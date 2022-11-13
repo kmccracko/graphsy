@@ -1,0 +1,66 @@
+{
+  "name": "inat-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/server/server.ts",
+  "scripts": {
+    "tsnode": "node --loader ts-node/esm --no-warnings",
+    "build": "NODE_ENV=production webpack",
+    "start": "NODE_ENV=production ts-node ./src/server/server.ts",
+    "start-web": "NODE_ENV=production PORT=80 ts-node ./src/server/server.ts",
+    "dev": "NODE_ENV=development webpack-dev-server & nodemon ./src/server/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kmccracko/inat-project.git"
+  },
+  "author": "Kyle McCracken",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kmccracko/inat-project/issues"
+  },
+  "homepage": "https://github.com/kmccracko/inat-project#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.7",
+    "@babel/preset-react": "^7.16.7",
+    "@types/express": "^4.17.14",
+    "@types/node": "^17.0.45",
+    "@types/react": "^18.0.18",
+    "@types/react-dom": "^18.0.6",
+    "@types/react-infinite-scroller": "^1.2.3",
+    "@types/webpack-env": "^1.18.0",
+    "babel-loader": "^8.2.3",
+    "copy-webpack-plugin": "^10.2.0",
+    "css-loader": "^6.7.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.6.1",
+    "node-sass": "^7.0.3",
+    "nodemon": "^2.0.19",
+    "sass-loader": "^13.0.2",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.65.0",
+    "webpack-bundle-analyzer": "^4.6.1",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.2"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cors": "^2.8.5",
+    "dotenv-webpack": "^8.0.1",
+    "express": "^4.17.2",
+    "node-cache": "^5.1.2",
+    "pg": "^8.8.0",
+    "react": "^18.3.0-next-f0efa1164-20220901",
+    "react-client": "^1.0.1",
+    "react-dom": "^18.3.0-next-f0efa1164-20220901",
+    "react-router": "^6.3.0",
+    "react-router-dom": "^6.3.0",
+    "sass": "^1.54.9",
+    "ts-node": "^10.9.1"
+  }
+}
