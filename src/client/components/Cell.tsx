@@ -12,9 +12,9 @@ interface IcellProps {
 
 const Cell = (props: IcellProps) => {
   let status = '';
-  if (props.meta.current.current === `${props.row}.${props.cell}`) {
+  if (props.meta.current === `${props.row}.${props.cell}`) {
     status += ' active';
-  } else if (props.meta.potential.potential === `${props.row}.${props.cell}`) {
+  } else if (props.meta.potential === `${props.row}.${props.cell}`) {
     status += ' potential';
   }
   if (props.meta.discovered.has(`${props.row}.${props.cell}`)) {

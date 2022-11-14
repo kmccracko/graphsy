@@ -19,8 +19,8 @@ const App = () => {
   const [fullGrid, setFullGrid] = useState<any>([[]]);
   const [algoRunning, setAlgoRunning] = useState<boolean>(false);
   const [meta, setMeta] = useState<any>({
-    current: { current: '' },
-    potential: { potential: '' },
+    current: '',
+    potential: '',
     visited: new Set(),
     discovered: new Set(),
   });
@@ -32,18 +32,29 @@ const App = () => {
     //   [7, 8, 9],
     // ]);
     setFullGrid(
-      [
-        [0, 0, 1, 0, 0],
-        [0, 0, 1, 0, 0],
-        [1, 0, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-      ]
+      // [
+      //   [0, 0, 1, 0, 0],
+      //   [0, 0, 1, 0, 0],
+      //   [1, 0, 1, 0, 1],
+      //   [1, 1, 1, 1, 1],
+      // ]
       // [
       //   [1, 1, 0, 0, 1],
       //   [1, 1, 0, 0, 0],
       //   [0, 0, 1, 0, 0],
       //   [1, 0, 0, 1, 1],
       // ]
+      [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ]
     );
   }, []);
   useEffect(() => {
@@ -90,7 +101,7 @@ const App = () => {
     setAlgoRunning(false);
   };
 
-  const runAlgo = async () => {
+  const runAlgo2 = async () => {
     // await resetMeta();
     const discovered = new Set();
     let islandCount = 0;
@@ -101,17 +112,21 @@ const App = () => {
         ...meta,
         potential: { ...meta.potential, potential: `${i}.${j}` },
       });
-      setMeta({
-        ...meta,
-        potential: { ...meta.potential, potential: `${i}.${j}` },
+      setMeta((meta: any) => {
+        return {
+          ...meta,
+          potential: `${i}.${j}`,
+        };
       });
       await sleep(500);
       // if 1 and not yet seen and coordinate is valid, discover it and continue
       if (!discovered.has(`${i}.${j}`) && fullGrid[i] && fullGrid[i][j] === 1) {
-        setMeta({
-          ...meta,
-          current: { ...meta.current, current: `${i}.${j}` },
-          discovered: meta.discovered.add(`${i}.${j}`),
+        setMeta((meta: any) => {
+          return {
+            ...meta,
+            current: `${i}.${j}`,
+            discovered: meta.discovered.add(`${i}.${j}`),
+          };
         });
         await sleep(500);
         // add location to saved
@@ -121,9 +136,11 @@ const App = () => {
         await findMore(i + 1, j);
         await findMore(i, j - 1);
         await findMore(i, j + 1);
-        setMeta({
-          ...meta,
-          potential: { ...meta.potential, potential: `` },
+        setMeta((meta: any) => {
+          return {
+            ...meta,
+            potential: '',
+          };
         });
         await sleep(500);
       }
@@ -132,10 +149,12 @@ const App = () => {
     for (let i = 0; i < fullGrid.length; i++) {
       for (let j = 0; j < fullGrid[i].length; j++) {
         // if 1s, check if we've seen it
-        setMeta({
-          ...meta,
-          current: { ...meta.current, current: `${i}.${j}` },
-          visited: meta.visited.add(`${i}.${j}`),
+        setMeta((meta: any) => {
+          return {
+            ...meta,
+            current: `${i}.${j}`,
+            visited: meta.visited.add(`${i}.${j}`),
+          };
         });
         await sleep(500);
         if (fullGrid[i][j] === 1) {
@@ -145,9 +164,87 @@ const App = () => {
             await findMore(i, j);
           }
         }
+        setMeta((meta: any) => {
+          return {
+            ...meta,
+            current: `${i}.${j}`,
+            visited: meta.visited.add(`${i}.${j}`),
+          };
+        });
+        await sleep(500);
       }
     }
     alert(islandCount);
+
+    setAlgoRunning(false);
+  };
+
+  const runAlgo = async () => {
+    // app should also pass a func to update its state
+    // we run the func after each loop of this algo, the func updates app state, and everything below it rerenders
+
+    // start point
+    let r = 4;
+    let c = 4;
+    // queue
+    const queue = [`${r}.${c}`];
+    const visited = new Set();
+
+    // while queue not empty
+    while (queue.length) {
+      // n = dequeue
+      let [row, col] = queue.pop().split('.');
+      r = Number(row);
+      c = Number(col);
+      console.log(r, c);
+      // for v of n.children, queue.add(v)
+      setMeta((meta: any) => {
+        return {
+          ...meta,
+          current: `${r}.${c}`,
+          visited: meta.visited.add(`${r}.${c}`),
+        };
+      });
+      await sleep(200);
+
+      // loop through coords
+      for (let coordinate of [
+        `${r - 1}.${c}`,
+        `${r + 1}.${c}`,
+        `${r}.${c - 1}`,
+        `${r}.${c + 1}`,
+      ]) {
+        // extract r, c
+        let r = Number(coordinate.split('.')[0]);
+        let c = Number(coordinate.split('.')[1]);
+
+        if (
+          fullGrid[r] &&
+          fullGrid[r][c] !== undefined &&
+          !visited.has(`${r}.${c}`)
+        ) {
+          //
+          console.log(`${r}.${c}`);
+          setMeta((meta: any) => {
+            return {
+              ...meta,
+              // active: `${r}.${c}`,
+              visited: meta.visited.add(`${r}.${c}`),
+            };
+          });
+          await sleep(200);
+          // add to visited
+          visited.add(`${r}.${c}`);
+          // unshift to queue
+          queue.unshift(`${r}.${c}`);
+        }
+      }
+
+      // break;
+    }
+
+    // look at all children of each child
+    // etc...
 
     setAlgoRunning(false);
   };
