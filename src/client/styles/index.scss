@@ -76,7 +76,7 @@ h1 {
   display: flex;
   flex-direction: column;
   width: 40vw;
-  border: 15px solid black;
+  border: 10px solid black;
   border-radius: 30px;
   .row {
     display: grid;
@@ -97,8 +97,12 @@ h1 {
         color: white;
         font-size: 1.5rem;
         text-align: center;
+        padding: 0px;
         // transition: scale 600ms;
         // transition-delay: 1000ms;
+        &:focus {
+          z-index: 3;
+        }
       }
       .visited {
         background-color: rgb(53, 70, 79);
@@ -112,9 +116,13 @@ h1 {
       }
       .active {
         border: 5px solid rgb(190, 21, 21);
-        // scale: 1.1;
         z-index: 2;
+        // scale: 1.1;
         // transition: scale 100ms;
+      }
+      .carrot {
+        border: 5px solid rgb(190, 111, 21);
+        // z-index: 2;
       }
       .wall {
         color: darkgray;
@@ -145,7 +153,7 @@ h1 {
 }
 
 .cell:hover .overlay {
-  z-index: 1;
+  z-index: 100;
   opacity: 1;
   translate: 0px -10px;
   transition: opacity 300ms, translate 200ms, z-index 1ms; // applied on entry

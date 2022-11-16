@@ -12,7 +12,9 @@ interface IcellProps {
 
 const Cell = (props: IcellProps) => {
   let status = '';
-  if (props.meta.current === `${props.row}.${props.cell}`) status += ' active';
+  if (props.value === 'C') status += ' carrot';
+  else if (props.meta.current === `${props.row}.${props.cell}`)
+    status += ' active';
   else if (props.meta.potential === `${props.row}.${props.cell}`)
     status += ' potential';
 
