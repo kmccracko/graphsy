@@ -1,3 +1,5 @@
+import { prettyLog } from './prettyLog';
+
 const forfor = async (
   grid: [[]] = [[]],
   start: number[],
@@ -55,6 +57,7 @@ const CountIslands = async (
       // if 1s, check if we've seen it
       await updateScreen({
         current: `${i}.${j}`,
+        potential: ``,
         visited: `${i}.${j}`,
       });
       if (grid[i][j]) {
@@ -71,6 +74,48 @@ const CountIslands = async (
     }
   }
   alert(islandCount);
+
+  shutOff(false);
+};
+
+const CountIslandsN = async (
+  grid: [[]] = [[]],
+  start: number[],
+  updateScreen: any = () => {},
+  shutOff: any = () => {}
+) => {
+  const islandSet: Set<Set<string>> = new Set();
+
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[i].length; j++) {
+      await updateScreen({ current: `${i}.${j}` });
+      if (grid[i][j] === '1') {
+        let islandHits = [];
+        for (let island of islandSet) {
+          prettyLog('Island vs land', 'label', island, `${i}.${j}`);
+          // if coord is touching an island left or right, add it to that island
+          if (island.has(`${i}.${j - 1}`) || island.has(`${i - 1}.${j}`)) {
+            island.add(`${i}.${j}`);
+            islandHits.push(island);
+          }
+        }
+        // if coord in multiple islands, join them
+        // a coord can only touch 2 islands at one time, so we can hardcode
+        if (islandHits.length > 1) {
+          islandSet.delete(islandHits[0]);
+          islandSet.delete(islandHits[1]);
+          console.log(new Set([...islandHits[0], ...islandHits[1]]));
+          console.log(islandHits[0]);
+          console.log(islandHits[1]);
+          islandSet.add(new Set([...islandHits[0], ...islandHits[1]]));
+        } else if (!islandHits.length) {
+          islandSet.add(new Set([`${i}.${j}`]));
+        }
+      }
+    }
+  }
+  console.log(islandSet);
+  alert(islandSet.size);
 
   shutOff(false);
 };
@@ -351,7 +396,7 @@ const solveMazeDFS = async (
         discovered: `${i}.${j}`,
       });
 
-      if (i === grid.length - 1 && j === grid[i].length - 1) return 'done';
+      //   if (i === grid.length - 1 && j === grid[i].length - 1) return 'done';
 
       // add location to saved
       discovered.add(`${i}.${j}`);

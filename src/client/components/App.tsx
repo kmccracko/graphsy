@@ -32,7 +32,7 @@ const App = () => {
   const [algoRunning, setAlgoRunning] = useState<boolean>(false);
   const [startPoint, setStartPoint] = useState<number[]>([0, 0]);
   // const [endPoint, setEndPoint] = useState<number[]>([0, 0]);
-  const [delay, setDelay] = useState<number>(200);
+  const [delay, setDelay] = useState<number>(10);
   const [meta, setMeta] = useState<any>(metaStarter());
 
   useEffect(() => {
@@ -143,6 +143,7 @@ const App = () => {
 
   return (
     <div id='Main'>
+      <h1>Welcome to Graphsy!</h1>
       <Routes>
         <Route
           path='/'
@@ -152,16 +153,27 @@ const App = () => {
                 <button onClick={() => setAlgoRunning(true)}>
                   Run Algorithm
                 </button>
-                <label>Set Delay</label>
-                <input
-                  type={'text'}
+
+                <label>Set Delay (ms)</label>
+                <select
                   onChange={(e) => {
                     setDelay(Number(e.target.value));
                   }}
-                ></input>
+                >
+                  <option selected>10</option>
+                  <option>50</option>
+                  <option>100</option>
+                  <option>200</option>
+                  <option>500</option>
+                  <option>800</option>
+                  <option>1000</option>
+                  <option>2000</option>
+                </select>
+
                 <label>Start Row</label>
                 <input
                   type={'text'}
+                  defaultValue={startPoint[0]}
                   onChange={(e) => {
                     setStartPoint((current) => [
                       Number(e.target.value),
@@ -169,9 +181,11 @@ const App = () => {
                     ]);
                   }}
                 ></input>
+
                 <label>Start Column</label>
                 <input
                   type={'text'}
+                  defaultValue={startPoint[1]}
                   onChange={(e) => {
                     setStartPoint((current) => [
                       current[0],
@@ -179,29 +193,26 @@ const App = () => {
                     ]);
                   }}
                 ></input>
-                <label>Select Algorithm *</label>
 
-                <select onChange={handleAlgoSelect}>
-                  <option></option>
+                <label>Select Grid *</label>
+                <select onChange={handleGridSelect} value={gridChoice}>
+                  <option>anchor</option>
+                  <option>grid1</option>
+                  <option>bigEmpty</option>
+                  <option>partitions</option>
+                  <option>maze</option>
+                </select>
+
+                <label>Select Algorithm *</label>
+                <select onChange={handleAlgoSelect} value={algoChoice}>
                   {Object.keys(algoChoices).map((el: any, i: number) => {
                     return <option key={i}>{el}</option>;
                   })}
                   <option>custom</option>
                 </select>
 
-                <label>Select Grid *</label>
-                <select onChange={handleGridSelect}>
-                  <option></option>
-                  <option>anchor</option>
-                  <option>grid1</option>
-                  <option>bigEmpty</option>
-                  <option>maze</option>
-                </select>
-
                 <label>Custom Algorithm</label>
-                <span>
-                  {'async (grid, startPoint, updateScreen, shutOff) => { '}
-                </span>
+                <p>{'async (grid, startPoint, updateScreen, shutOff) => { '}</p>
                 <textarea
                   onChange={handleCustomFuncChange}
                   value={customAlgoString}
