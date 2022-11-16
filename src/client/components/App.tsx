@@ -22,17 +22,29 @@ const sleep = (ms: number) => {
 
 const App = () => {
   // set vars
+  const [customAlgoString, setCustomAlgoString] = useState<string>(
+    'alert("Custom function executed!");'
+  );
+  const [algoChoice, setAlgoChoice] = useState<string>('forfor');
+  const [gridChoice, setGridChoice] = useState<string>('maze');
   const [currentGrid, setCurrentGrid] = useState<any>([[]]);
-  const [algoRunning, setAlgoRunning] = useState<boolean>(false);
   const [currentAlgo, setCurrentAlgo] = useState<any>(false);
+  const [algoRunning, setAlgoRunning] = useState<boolean>(false);
   const [startPoint, setStartPoint] = useState<number[]>([0, 0]);
-  const [endPoint, setEndPoint] = useState<number[]>([0, 0]);
+  // const [endPoint, setEndPoint] = useState<number[]>([0, 0]);
   const [delay, setDelay] = useState<number>(200);
   const [meta, setMeta] = useState<any>(metaStarter());
 
   useEffect(() => {
-    setCurrentGrid(chooseGrid('maze'));
-  }, []);
+    setCurrentGrid(chooseGrid(gridChoice));
+  }, [gridChoice]);
+
+  useEffect(() => {
+    let newAlgo: Function;
+    if (algoChoice === 'custom') newAlgo = buildAlgo(customAlgoString);
+    else newAlgo = algoChoices[algoChoice];
+    setCurrentAlgo(() => newAlgo);
+  }, [algoChoice]);
 
   useEffect(() => {
     setMeta(() => metaStarter());
@@ -96,15 +108,15 @@ const App = () => {
   };
 
   const handleAlgoSelect = (e: any) => {
-    setCurrentAlgo(() => {
-      return e.target.value === 'custom'
-        ? currentAlgo
-        : algoChoices[e.target.value];
-    });
+    setAlgoChoice(e.target.value);
   };
 
   const handleGridSelect = (e: any) => {
-    setCurrentGrid(chooseGrid(e.target.value));
+    setGridChoice(e.target.value);
+  };
+
+  const handleCustomFuncChange = (e: any) => {
+    setCustomAlgoString(e.target.value);
   };
 
   /**
@@ -115,18 +127,18 @@ const App = () => {
    *
    * We generate the outer function, then invoke it and pass the returned async function as the new currentAlgo.
    */
-  const handleCustomFuncBlur = (e: any) => {
-    console.log(e.target.value);
+  const buildAlgo = (algoString: string) => {
+    console.log(algoString);
     const newFunc = new Function(
       'grid, start=[1,3], updateScreen, shutOff',
       `
       return async (grid, start, updateScreen, shutOff) => { 
-        ${e.target.value} \n 
+        ${algoString} \n 
         shutOff(false);
       }`
     );
     const asyncFunc = newFunc();
-    setCurrentAlgo(() => asyncFunc);
+    return asyncFunc;
   };
 
   return (
@@ -191,8 +203,8 @@ const App = () => {
                   {'async (grid, startPoint, updateScreen, shutOff) => { '}
                 </span>
                 <textarea
-                  onBlur={handleCustomFuncBlur}
-                  defaultValue='alert("Custom function executed!");'
+                  onChange={handleCustomFuncChange}
+                  value={customAlgoString}
                 ></textarea>
               </div>
               <div id='grid'>
