@@ -24,14 +24,17 @@ const Cell = (props: IcellProps) => {
   else '';
 
   return (
-    <input
-      type='text'
-      className={`cell ${status}`}
-      onChange={(e) => {
-        props.updateGrid(e, props.row, props.cell);
-      }}
-      value={props.value}
-    />
+    <div className='cell'>
+      <input
+        className={status}
+        type='text'
+        onChange={(e) => {
+          props.updateGrid(e, props.row, props.cell);
+        }}
+        value={props.value}
+      />
+      <div className='overlay'>{`r${props.row}, c${props.cell}`}</div>
+    </div>
   );
 };
 export default Cell;

@@ -38,29 +38,62 @@ button {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
-    input {
-      background-color: gray;
-      color: white;
+    .cell {
+      position: relative; // relative for tooltip
+      display: flex;
       aspect-ratio: 1/1;
-      font-size: 1.5rem;
-      text-align: center;
-      border: 5px solid black;
-    }
-    .active {
-      border: 5px solid rgb(190, 21, 21);
-    }
-    .visited {
-      background-color: rgb(53, 70, 79);
-    }
-    .discovered {
-      background-color: rgb(67, 127, 71);
-    }
-    .potential {
-      border: 5px solid rgb(190, 179, 21);
-    }
-    .wall {
-      color: darkgray;
-      background-color: rgb(31, 31, 31);
+      input {
+        aspect-ratio: 1/1;
+        border: 5px solid black;
+        background-color: gray;
+        color: white;
+        font-size: 1.5rem;
+        text-align: center;
+      }
+      .active {
+        border: 5px solid rgb(190, 21, 21);
+      }
+      .visited {
+        background-color: rgb(53, 70, 79);
+      }
+      .discovered {
+        background-color: rgb(67, 127, 71);
+      }
+      .potential {
+        border: 5px solid rgb(190, 179, 21);
+      }
+      .wall {
+        color: darkgray;
+        background-color: rgb(31, 31, 31);
+      }
     }
   }
+}
+
+.cell .overlay {
+  opacity: 0;
+  z-index: -111;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  font-size: 110%;
+  font-weight: bolder;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 5px;
+  position: absolute;
+  translate: 0px 30px;
+  left: 50%;
+  transition: opacity 100ms, translate 100ms, z-index 100ms step-end; // applied on exit
+  // the following are just to center the tooltip
+  width: 70px;
+  // margin left formula is -(width/2 + padding left)
+  margin-left: -40px;
+}
+
+.cell:hover .overlay {
+  z-index: 1;
+  opacity: 1;
+  translate: 0px -10px;
+  transition: opacity 300ms, translate 200ms, z-index 1ms; // applied on entry
+  transition-delay: 500ms;
 }
