@@ -2,39 +2,65 @@ body {
   background-color: rgb(49, 49, 49);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: white;
 }
-input {
-  background-color: gray;
-  width: 60px;
-  height: 60px;
-}
+
 button {
   height: 20px;
   width: 100px;
 }
 
-.grid {
-  margin: 90px;
-}
-.row {
+#main2 {
   display: flex;
 }
-.cell {
-  padding: 50px;
-  color: white;
-  font-size: xx-large;
-  border: 2px solid rgb(159, 159, 159);
-  border: 5px solid black;
+
+.panel {
+  width: 20vw;
+  display: flex;
+  flex-direction: column;
+  label {
+    font-size: larger;
+  }
+  input,
+  select,
+  textarea {
+    font-size: larger;
+    background-color: lightgray;
+  }
 }
-.active {
-  border: 5px solid rgb(190, 21, 21);
-}
-.visited {
-  background-color: rgb(53, 70, 79);
-}
-.discovered {
-  background-color: rgb(67, 127, 71);
-}
-.potential {
-  border: 5px solid rgb(190, 179, 21);
+
+#grid {
+  display: flex;
+  flex-direction: column;
+  width: 40vw;
+  margin: 90px;
+  .row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    input {
+      background-color: gray;
+      color: white;
+      aspect-ratio: 1/1;
+      font-size: 1.5rem;
+      text-align: center;
+      border: 5px solid black;
+    }
+    .active {
+      border: 5px solid rgb(190, 21, 21);
+    }
+    .visited {
+      background-color: rgb(53, 70, 79);
+    }
+    .discovered {
+      background-color: rgb(67, 127, 71);
+    }
+    .potential {
+      border: 5px solid rgb(190, 179, 21);
+    }
+    .wall {
+      color: darkgray;
+      background-color: rgb(31, 31, 31);
+    }
+  }
 }
