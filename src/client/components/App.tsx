@@ -61,7 +61,7 @@ const App = () => {
   }, [currentGrid, endPointStatus]);
 
   useEffect(() => {
-    setMeta(() => metaStarter());
+    if (!algoRunning) setMeta(() => metaStarter());
   }, [currentGrid]);
 
   useEffect(() => {
