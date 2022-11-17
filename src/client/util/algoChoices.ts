@@ -10,9 +10,12 @@ const forfor = {
   ) => {
     for (let i = start[0]; i < grid.length; i++) {
       for (let j = start[1]; j < grid[i].length; j++) {
-        await updateScreen({
-          current: `${i}.${j}`,
-        });
+        if (
+          await updateScreen({
+            current: `${i}.${j}`,
+          })
+        )
+          return;
       }
     }
 
@@ -34,9 +37,12 @@ const CountIslands = {
     let islandCount = 0;
 
     const findMore = async (i: number, j: number) => {
-      await updateScreen({
-        potential: `${i}.${j}`,
-      });
+      if (
+        await updateScreen({
+          potential: `${i}.${j}`,
+        })
+      )
+        return 'abort';
       // if 1 and not yet seen and coordinate is valid, discover it and continue
       if (!discovered.has(`${i}.${j}`) && grid[i] && grid[i][j]) {
         await updateScreen({
@@ -46,10 +52,10 @@ const CountIslands = {
         // add location to saved
         discovered.add(`${i}.${j}`);
         // try up, down, left, right
-        await findMore(i - 1, j);
-        await findMore(i + 1, j);
-        await findMore(i, j - 1);
-        await findMore(i, j + 1);
+        if ((await findMore(i - 1, j)) === 'abort') return;
+        if ((await findMore(i + 1, j)) === 'abort') return;
+        if ((await findMore(i, j - 1)) === 'abort') return;
+        if ((await findMore(i, j + 1)) === 'abort') return;
         await updateScreen({
           potential: `${i}.${j}`,
         });
@@ -58,12 +64,16 @@ const CountIslands = {
 
     for (let i = start[0]; i < grid.length; i++) {
       for (let j = start[1]; j < grid[i].length; j++) {
+        if (
+          await updateScreen({
+            current: `${i}.${j}`,
+            potential: ``,
+            visited: `${i}.${j}`,
+          })
+        )
+          return;
+
         // if 1s, check if we've seen it
-        await updateScreen({
-          current: `${i}.${j}`,
-          potential: ``,
-          visited: `${i}.${j}`,
-        });
         if (grid[i][j]) {
           // if undiscovered, launch findMore recursion
           if (!discovered.has(`${i}.${j}`)) {
@@ -112,9 +122,6 @@ const CountIslandsN = {
           if (islandHits.length > 1) {
             islandSet.delete(islandHits[0]);
             islandSet.delete(islandHits[1]);
-            console.log(new Set([...islandHits[0], ...islandHits[1]]));
-            console.log(islandHits[0]);
-            console.log(islandHits[1]);
             islandSet.add(new Set([...islandHits[0], ...islandHits[1]]));
           } else if (!islandHits.length) {
             islandSet.add(new Set([`${i}.${j}`]));
@@ -122,7 +129,6 @@ const CountIslandsN = {
         }
       }
     }
-    console.log(islandSet);
     alert(islandSet.size);
 
     shutOff(false);
@@ -151,10 +157,13 @@ const BFS = {
       r = Number(row);
       c = Number(col);
 
-      await updateScreen({
-        current: `${r}.${c}`,
-        discovered: `${r}.${c}`,
-      });
+      if (
+        await updateScreen({
+          current: `${r}.${c}`,
+          discovered: `${r}.${c}`,
+        })
+      )
+        return;
 
       // loop through coords
       for (let coordinate of [
@@ -197,9 +206,12 @@ const DFS = {
     const discovered = new Set();
 
     const findMore = async (i: number, j: number) => {
-      await updateScreen({
-        potential: `${i}.${j}`,
-      });
+      if (
+        await updateScreen({
+          potential: `${i}.${j}`,
+        })
+      )
+        return 'abort';
       // if 1 and not yet seen and coordinate is valid, discover it and continue
       if (!discovered.has(`${i}.${j}`) && grid[i] && grid[i][j] !== undefined) {
         await updateScreen({
@@ -209,10 +221,10 @@ const DFS = {
         // add location to saved
         discovered.add(`${i}.${j}`);
         // try up, down, left, right
-        await findMore(i - 1, j);
-        await findMore(i, j + 1);
-        await findMore(i + 1, j);
-        await findMore(i, j - 1);
+        if ((await findMore(i - 1, j)) === 'abort') return 'abort';
+        if ((await findMore(i, j + 1)) === 'abort') return 'abort';
+        if ((await findMore(i + 1, j)) === 'abort') return 'abort';
+        if ((await findMore(i, j - 1)) === 'abort') return 'abort';
         await updateScreen({
           potential: `${i}.${j}`,
         });
@@ -360,10 +372,13 @@ const solveMazeBFS = {
       r = Number(row);
       c = Number(col);
 
-      await updateScreen({
-        current: `${r}.${c}`,
-        discovered: `${r}.${c}`,
-      });
+      if (
+        await updateScreen({
+          current: `${r}.${c}`,
+          discovered: `${r}.${c}`,
+        })
+      )
+        return;
 
       if (r === end[0] && c === end[1]) break;
 
@@ -413,9 +428,12 @@ const solveMazeDFS = {
     const discovered = new Set();
 
     const findMore = async (i: number, j: number) => {
-      await updateScreen({
-        potential: `${i}.${j}`,
-      });
+      if (
+        await updateScreen({
+          potential: `${i}.${j}`,
+        })
+      )
+        return 'done';
       // if 1 and not yet seen and coordinate is valid, discover it and continue
       if (
         !discovered.has(`${i}.${j}`) &&
@@ -472,10 +490,13 @@ const closestCarrot = {
       [r, c] = currentCoord.coord;
       let currentLevel = currentCoord.level;
 
-      await updateScreen({
-        current: `${r}.${c}`,
-        discovered: `${r}.${c}`,
-      });
+      if (
+        await updateScreen({
+          current: `${r}.${c}`,
+          discovered: `${r}.${c}`,
+        })
+      )
+        return;
 
       if (grid[r][c] === 'C') {
         shortestPath = currentLevel;

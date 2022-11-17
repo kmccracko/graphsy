@@ -25,6 +25,7 @@ const App = () => {
   const [customAlgoString, setCustomAlgoString] = useState<string>(
     'alert("Custom function executed!");'
   );
+
   const [algoChoice, setAlgoChoice] = useState<string>('forfor');
   const [algoDesc, setAlgoDesc] = useState<string>('');
   const [gridChoice, setGridChoice] = useState<string>('maze');
@@ -90,6 +91,17 @@ const App = () => {
    * @param ms Milliseconds to delay after updating screen.
    */
   const updateScreen = async (newMeta: any, ms: number = delay) => {
+    // check if we should abort, if yes returns 1
+    // if "await updateScreen({...})" ever returns 1,
+    // the executing function should try to complete itself however it can
+    let shouldAbort = false;
+    setAlgoRunning((keepRunning) => {
+      if (!keepRunning) shouldAbort = true;
+      return keepRunning;
+    });
+    if (shouldAbort) return 1;
+
+    // updates meta object to inform classes
     setMeta((meta: any) => {
       const tempObj = { ...meta };
       if (newMeta.visited !== undefined)
@@ -101,6 +113,8 @@ const App = () => {
       if (newMeta.current !== undefined) tempObj.current = newMeta.current;
       return tempObj;
     });
+
+    // updates grid values if passed
     if (newMeta.grid !== undefined) {
       console.log(newMeta.grid);
       await updateGrid(
@@ -136,7 +150,10 @@ const App = () => {
   };
 
   const handleCustomFuncChange = (e: any) => {
+    console.log(e.target.value);
     setCustomAlgoString(e.target.value);
+    if (algoChoice === 'custom')
+      setCurrentAlgo(() => buildAlgo(e.target.value));
   };
 
   /**
@@ -173,6 +190,7 @@ const App = () => {
                 <button onClick={() => setAlgoRunning(true)}>
                   Run Algorithm
                 </button>
+                <button onClick={() => setAlgoRunning(false)}>ABORT!!</button>
 
                 <div id='options'>
                   <label>Set Delay (ms)</label>
@@ -279,7 +297,7 @@ const App = () => {
                   <label>Custom Algorithm</label>
                   <span className='elaboration'>
                     {
-                      'updateScreen options: current, potential, visited, discovered.'
+                      'updateScreen options: current, potential, visited, discovered, grid.'
                     }
                   </span>
                   <span className='elaboration'>
