@@ -157,6 +157,15 @@ h1 {
           z-index: 3;
         }
       }
+      .carrot {
+        border: 3px solid rgb(255, 169, 72);
+        color: rgb(0, 0, 0, 0);
+        &:focus {
+          color: white;
+          border-width: 5px;
+        }
+        z-index: 2;
+      }
       .visited {
         background-color: rgb(53, 70, 79);
       }
@@ -173,13 +182,23 @@ h1 {
         // scale: 1.1;
         // transition: scale 100ms;
       }
-      .carrot {
-        border: 5px solid rgb(190, 111, 21);
-        // z-index: 2;
-      }
       .wall {
         color: darkgray;
         background-color: rgb(31, 31, 31);
+      }
+      &:has(.carrot) {
+        &::after {
+          content: '🥕';
+          pointer-events: none;
+          position: absolute;
+          width: 70%;
+          height: 70%;
+          left: 14%;
+          top: 14%;
+          font-size: 2vw;
+          text-align: center;
+          z-index: 2;
+        }
       }
     }
   }
