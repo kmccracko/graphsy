@@ -43,14 +43,11 @@ const App = () => {
   }, [gridChoice]);
 
   useEffect(() => {
-    let func: Function,
-      desc: string = 'Custom Function!',
+    let desc: string = 'Custom Function!',
       endPoint: boolean = true;
 
-    if (algoChoice === 'custom') func = buildAlgo(customAlgoString);
-    else ({ func, desc, endPoint } = algoChoices[algoChoice]);
+    if (algoChoice !== 'custom') ({ desc, endPoint } = algoChoices[algoChoice]);
 
-    setCurrentAlgo(() => func);
     setAlgoDesc(desc);
     setEndPointStatus(endPoint);
   }, [algoChoice]);
@@ -130,9 +127,15 @@ const App = () => {
    * Invoke currentAlgo function and provide it with params from current state
    */
   const runAlgo = async () => {
+    let func: Function;
+
+    if (algoChoice === 'custom') func = buildAlgo(customAlgoString);
+    else ({ func } = algoChoices[algoChoice]);
+
     setMeta(() => metaStarter());
     await sleep(100);
-    currentAlgo(
+
+    func(
       currentGrid,
       startPoint,
       endPointStatus && endPoint,
@@ -152,8 +155,6 @@ const App = () => {
   const handleCustomFuncChange = (e: any) => {
     console.log(e.target.value);
     setCustomAlgoString(e.target.value);
-    if (algoChoice === 'custom')
-      setCurrentAlgo(() => buildAlgo(e.target.value));
   };
 
   /**
