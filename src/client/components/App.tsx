@@ -64,7 +64,7 @@ const App = () => {
 
   useEffect(() => {
     console.log('algoRunning changed! is now', algoRunning);
-    if (algoRunning && currentAlgo) runAlgo();
+    if (algoRunning && algoChoice) runAlgo();
     else setAlgoRunning(false);
   }, [algoRunning]);
 
