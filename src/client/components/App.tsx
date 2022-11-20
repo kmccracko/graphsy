@@ -25,6 +25,7 @@ const App = () => {
   const [customAlgoString, setCustomAlgoString] = useState<string>(
     'alert("Custom function executed!");'
   );
+  const [customGridString, setCustomGridString] = useState<string>('[[]]');
 
   const [algoChoice, setAlgoChoice] = useState<string>('forfor');
   const [algoDesc, setAlgoDesc] = useState<string>('');
@@ -39,7 +40,7 @@ const App = () => {
   const [meta, setMeta] = useState<any>(metaStarter());
 
   useEffect(() => {
-    setCurrentGrid(chooseGrid(gridChoice));
+    if (gridChoice !== 'custom') setCurrentGrid(chooseGrid(gridChoice));
   }, [gridChoice]);
 
   useEffect(() => {
@@ -154,8 +155,27 @@ const App = () => {
   };
 
   const handleCustomFuncChange = (e: any) => {
-    console.log(e.target.value);
     setCustomAlgoString(e.target.value);
+  };
+  const handleCustomGridChange = (e: any) => {
+    const cleanStr = e.target.value.replaceAll("'", '"');
+    console.log(cleanStr);
+    setCustomGridString(cleanStr);
+  };
+  const handleCreateGrid = () => {
+    if (gridChoice !== 'custom') return;
+    try {
+      const parsedGrid = JSON.parse(customGridString);
+      // verify row lengths all match
+      let firstLen = parsedGrid[0].length;
+      for (let row of parsedGrid) {
+        if (row.length !== firstLen)
+          throw new Error('Inconsistent row lengths');
+      }
+      setCurrentGrid(parsedGrid);
+    } catch (e) {
+      alert(e);
+    }
   };
 
   /**
@@ -289,6 +309,7 @@ const App = () => {
                     <option>bigEmpty</option>
                     <option>partitions</option>
                     <option>maze</option>
+                    <option>custom</option>
                   </select>
 
                   <label>Select Algorithm *</label>
@@ -318,6 +339,12 @@ const App = () => {
                     onChange={handleCustomFuncChange}
                     value={customAlgoString}
                   ></textarea>
+                  <label>Custom Grid</label>
+                  <textarea
+                    onChange={handleCustomGridChange}
+                    defaultValue={customGridString}
+                  ></textarea>
+                  <button onClick={handleCreateGrid}>Create Grid</button>
                 </div>
               </div>
               <div id='grid'>
