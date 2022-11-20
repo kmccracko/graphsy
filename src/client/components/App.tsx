@@ -135,6 +135,7 @@ const App = () => {
     setMeta(() => metaStarter());
     await sleep(100);
 
+    if (!func) return setAlgoRunning(false);
     func(
       currentGrid,
       startPoint,
@@ -167,14 +168,20 @@ const App = () => {
    */
   const buildAlgo = (algoString: string) => {
     console.log(algoString);
-    const newFunc = new Function(
-      'grid, start=[1,3], updateScreen, shutOff',
-      `
-      return async (grid, start, end, updateScreen, shutOff) => { 
-        ${algoString} \n 
-        shutOff(false);
-      }`
-    );
+    let newFunc;
+    try {
+      newFunc = new Function(
+        'grid, start=[1,3], updateScreen, shutOff',
+        `
+        return async (grid, start, end, updateScreen, shutOff) => { 
+          ${algoString} \n 
+          shutOff(false);
+        }`
+      );
+    } catch {
+      alert('Could not generate algorithm. Aborting');
+      return newFunc;
+    }
     const asyncFunc = newFunc();
     return asyncFunc;
   };
