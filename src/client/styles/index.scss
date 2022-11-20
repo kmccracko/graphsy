@@ -120,6 +120,15 @@ h1 {
       font-size: large;
       // font-style: italic;
     }
+    #grid-adjust-buttons {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      .btn-small {
+        padding: 4px;
+        width: 100%;
+      }
+    }
   }
 }
 

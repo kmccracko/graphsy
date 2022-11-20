@@ -372,18 +372,32 @@ const App = () => {
                   ></textarea>
                   <button onClick={handleCreateGrid}>Create Grid</button>
                   <label>Edit Current Grid</label>
-                  <button onClick={() => handleGridResize([1, 0])}>
-                    + Row
-                  </button>
-                  <button onClick={() => handleGridResize([-1, 0])}>
-                    - Row
-                  </button>
-                  <button onClick={() => handleGridResize([0, 1])}>
-                    + Col
-                  </button>
-                  <button onClick={() => handleGridResize([0, -1])}>
-                    - Col
-                  </button>
+                  <div id='grid-adjust-buttons'>
+                    <button
+                      className='btn-small'
+                      onClick={() => handleGridResize([-1, 0])}
+                    >
+                      - Row
+                    </button>
+                    <button
+                      className='btn-small'
+                      onClick={() => handleGridResize([1, 0])}
+                    >
+                      + Row
+                    </button>
+                    <button
+                      className='btn-small'
+                      onClick={() => handleGridResize([0, -1])}
+                    >
+                      - Col
+                    </button>
+                    <button
+                      className='btn-small'
+                      onClick={() => handleGridResize([0, 1])}
+                    >
+                      + Col
+                    </button>
+                  </div>
                   <label>New Cell Filler</label>
                   <input
                     type='text'
