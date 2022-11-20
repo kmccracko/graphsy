@@ -26,11 +26,12 @@ const App = () => {
     'alert("Custom function executed!");'
   );
   const [customGridString, setCustomGridString] = useState<string>('[[]]');
+  const [defaultFill, setDefaultFill] = useState<string>('');
 
   const [algoChoice, setAlgoChoice] = useState<string>('forfor');
   const [algoDesc, setAlgoDesc] = useState<string>('');
   const [gridChoice, setGridChoice] = useState<string>('maze');
-  const [currentGrid, setCurrentGrid] = useState<any>([[]]);
+  const [currentGrid, setCurrentGrid] = useState<any[][]>([[]]);
   const [currentAlgo, setCurrentAlgo] = useState<any>(false);
   const [algoRunning, setAlgoRunning] = useState<boolean>(false);
   const [startPoint, setStartPoint] = useState<number[]>([0, 0]);
@@ -154,6 +155,9 @@ const App = () => {
     setGridChoice(e.target.value);
   };
 
+  const handleDefaultFillChange = (e: any) => {
+    setDefaultFill(e.target.value);
+  };
   const handleCustomFuncChange = (e: any) => {
     setCustomAlgoString(e.target.value);
   };
@@ -176,6 +180,28 @@ const App = () => {
     } catch (e) {
       alert(e);
     }
+  };
+  const handleGridResize = (adjustments: [number, number]) => {
+    let [rowChange, colChange] = adjustments;
+
+    let newGrid;
+    if (rowChange) {
+      if (rowChange > 0) {
+        newGrid = [
+          ...currentGrid,
+          Array(currentGrid[0].length).fill(defaultFill),
+        ];
+      } else if (currentGrid.length > 1) {
+        newGrid = currentGrid.slice(0, -1);
+      } else return;
+    } else {
+      if (colChange < 0 && currentGrid[0].length < 2) return;
+      newGrid = currentGrid.reduce((acc, cur) => {
+        if (colChange > 0) return [...acc, [...cur, defaultFill]];
+        else return [...acc, cur.slice(0, -1)];
+      }, []);
+    }
+    setCurrentGrid(newGrid);
   };
 
   /**
@@ -345,6 +371,25 @@ const App = () => {
                     defaultValue={customGridString}
                   ></textarea>
                   <button onClick={handleCreateGrid}>Create Grid</button>
+                  <label>Edit Current Grid</label>
+                  <button onClick={() => handleGridResize([1, 0])}>
+                    + Row
+                  </button>
+                  <button onClick={() => handleGridResize([-1, 0])}>
+                    - Row
+                  </button>
+                  <button onClick={() => handleGridResize([0, 1])}>
+                    + Col
+                  </button>
+                  <button onClick={() => handleGridResize([0, -1])}>
+                    - Col
+                  </button>
+                  <label>New Cell Filler</label>
+                  <input
+                    type='text'
+                    value={defaultFill}
+                    onChange={handleDefaultFillChange}
+                  ></input>
                 </div>
               </div>
               <div id='grid'>
