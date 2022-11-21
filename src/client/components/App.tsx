@@ -25,7 +25,9 @@ const App = () => {
   const [customAlgoString, setCustomAlgoString] = useState<string>(
     'alert("Custom function executed!");'
   );
-  const [customGridString, setCustomGridString] = useState<string>('[[]]');
+  const [customGridString, setCustomGridString] = useState<string>(
+    '[[1,2,3],[4,5,6],[7,8,9]]'
+  );
   const [defaultFill, setDefaultFill] = useState<string>('');
 
   const [algoChoice, setAlgoChoice] = useState<string>('forfor');
@@ -234,17 +236,29 @@ const App = () => {
 
   return (
     <div id='Main'>
-      <h1>Welcome to Graphsy!</h1>
       <Routes>
         <Route
           path='/'
           element={
             <div id='main2'>
               <div className='panel'>
-                <button onClick={() => setAlgoRunning(true)}>
-                  Run Algorithm
-                </button>
-                <button onClick={() => setAlgoRunning(false)}>ABORT!!</button>
+                <h1>Graphsy</h1>
+                <div id='start-stop-buttons'>
+                  <button
+                    id='start-btn'
+                    className={algoRunning ? 'inactive' : ''}
+                    onClick={() => setAlgoRunning(true)}
+                  >
+                    Run
+                  </button>
+                  <button
+                    id='stop-btn'
+                    className={algoRunning ? '' : 'inactive'}
+                    onClick={() => setAlgoRunning(false)}
+                  >
+                    Abort
+                  </button>
+                </div>
 
                 <div id='options'>
                   <label>Set Delay (ms)</label>
@@ -373,30 +387,39 @@ const App = () => {
                   <button onClick={handleCreateGrid}>Create Grid</button>
                   <label>Edit Current Grid</label>
                   <div id='grid-adjust-buttons'>
+                    <div className='space'></div>
                     <button
-                      className='btn-small'
+                      className={`btn-small ${
+                        currentGrid.length < 2 ? 'inactive' : ''
+                      }`}
                       onClick={() => handleGridResize([-1, 0])}
                     >
                       - Row
                     </button>
+                    <div className='space'></div>
                     <button
-                      className='btn-small'
-                      onClick={() => handleGridResize([1, 0])}
-                    >
-                      + Row
-                    </button>
-                    <button
-                      className='btn-small'
+                      className={`btn-small ${
+                        currentGrid[0].length < 2 ? 'inactive' : ''
+                      }`}
                       onClick={() => handleGridResize([0, -1])}
                     >
                       - Col
                     </button>
+                    <div className='box'></div>
                     <button
                       className='btn-small'
                       onClick={() => handleGridResize([0, 1])}
                     >
                       + Col
                     </button>
+                    <div className=''></div>
+                    <button
+                      className='btn-small'
+                      onClick={() => handleGridResize([1, 0])}
+                    >
+                      + Row
+                    </button>
+                    <div className=''></div>
                   </div>
                   <label>New Cell Filler</label>
                   <input
@@ -406,10 +429,24 @@ const App = () => {
                   ></input>
                 </div>
               </div>
-              <div id='grid'>
+              <div
+                id='grid'
+                style={{
+                  gridTemplateRows: `repeat(${currentGrid.length},${
+                    currentGrid.length > currentGrid[0].length
+                      ? Math.round(100 / currentGrid.length)
+                      : Math.round(100 / currentGrid[0].length)
+                  }%)`,
+                }}
+              >
                 {currentGrid.map((el: any, i: number) => {
                   return (
                     <Row
+                      size={
+                        currentGrid.length > currentGrid[0].length
+                          ? Math.round(100 / currentGrid.length)
+                          : Math.round(100 / currentGrid[0].length)
+                      }
                       key={i}
                       row={i}
                       cells={el}

@@ -4,6 +4,7 @@ import Cell from './Cell';
 import '../styles/index.scss';
 
 interface IrowProps {
+  size: number;
   row: number;
   cells: any;
   meta: any;
@@ -24,6 +25,13 @@ const Row = (props: IrowProps) => {
     );
   });
 
-  return <div className='row'>{cells}</div>;
+  return (
+    <div
+      style={{ gridTemplateColumns: `repeat(${cells.length},${props.size}%)` }}
+      className='row'
+    >
+      {cells}
+    </div>
+  );
 };
 export default Row;

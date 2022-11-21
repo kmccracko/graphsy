@@ -1,11 +1,15 @@
 body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
   background-color: rgb(49, 49, 49);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: white;
-  height: 95vh;
 }
-
+h1 {
+  text-align: center;
+}
 button {
   align-self: center;
   width: 250px;
@@ -26,44 +30,49 @@ button {
   transition: background-color 300ms, transform 60ms;
 }
 #root {
-  height: 100%;
+  // height: 100%;
   #Main {
-    height: 100%;
+    // height: 100%;
     #main2 {
       display: flex;
-      align-items: center;
-      height: 90%;
+      align-items: flex-start;
     }
   }
 }
-h1 {
-  margin-left: 20px;
-}
 .panel {
-  position: fixed;
-  left: 20px;
-  top: 100px;
-  height: 80vh;
+  margin: 0;
+  height: 91vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  // margin: 20px;
-  // margin-right: 70px;
   padding: 20px;
   padding-bottom: 30px;
   background-color: rgb(60, 91, 107);
   border: 1px solid rgb(152, 207, 218);
   border-radius: 20px;
+  max-width: 50vw;
+  min-width: 20vw;
+  resize: horizontal;
 
+  #start-stop-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    button {
+      width: 40%;
+    }
+  }
   #options {
-    width: 25vw;
+    margin-top: 10px;
+    border: 5px solid black;
+    max-width: 50vw;
+    min-width: 18vw;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     padding: 10px;
 
     &::-webkit-scrollbar {
-      width: 12px;
+      width: 25px;
     }
     &::-webkit-scrollbar-track {
       // margin: 15px;
@@ -72,6 +81,7 @@ h1 {
     }
     &::-webkit-scrollbar-thumb {
       background: rgb(147, 193, 207);
+      // border: 2px solid rgb(126, 109, 0);
       border-radius: 10px;
       &:hover {
         background: #88a8af;
@@ -123,9 +133,19 @@ h1 {
     #grid-adjust-buttons {
       margin-top: 10px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 70px 70px 70px;
+      justify-items: center;
+      // align-items: center;
       .btn-small {
-        padding: 4px;
+        margin: 0px;
+        padding: 6px;
+        width: 80px;
+      }
+      .box {
+        background-color: rgb(0, 0, 0, 0.3);
+        border: 2px solid rgb(255, 255, 255, 0.7);
+        height: 100%;
         width: 100%;
       }
     }
@@ -133,31 +153,30 @@ h1 {
 }
 
 #grid {
-  position: relative;
-  left: 33vw;
-  display: flex;
-  flex-direction: column;
-  width: 40vw;
-  border: 10px solid black;
+  align-self: center;
+  margin: 1% 5%;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  align-content: center;
+  height: 85vh;
+  width: 100%;
   border-radius: 30px;
   .row {
     display: grid;
-    // below allows cells to shrink at same size within dynamic width
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    background-color: black;
+    justify-content: center;
+    display: flex;
     .cell {
+      aspect-ratio: 1/1;
       position: relative; // relative for tooltip
       display: flex;
-      aspect-ratio: 1/1;
-      // margin: 1px;
       input {
-        aspect-ratio: 1/1;
+        width: 100%;
         border: 5px solid black;
         border-radius: 10px;
         background-color: gray;
         color: white;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         text-align: center;
         padding: 0px;
         // transition: scale 600ms;
@@ -209,6 +228,17 @@ h1 {
           z-index: 2;
         }
       }
+      &::before {
+        // this is to give black background in between cells
+        content: '';
+        position: absolute;
+        margin-left: -5%;
+        margin-top: -5%;
+        width: 110%;
+        height: 115%;
+        z-index: -100;
+        background-color: rgb(0, 0, 0);
+      }
     }
   }
 }
@@ -242,4 +272,8 @@ h1 {
 }
 .mono {
   font-family: 'Courier New', Courier, monospace;
+}
+.inactive {
+  opacity: 0.5;
+  pointer-events: none;
 }
