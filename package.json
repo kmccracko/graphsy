@@ -49,6 +49,7 @@
     "webpack-dev-server": "^4.7.2"
   },
   "dependencies": {
+    "ace-builds": "^1.13.1",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv-webpack": "^8.0.1",
@@ -56,6 +57,7 @@
     "node-cache": "^5.1.2",
     "pg": "^8.8.0",
     "react": "^18.3.0-next-f0efa1164-20220901",
+    "react-ace": "^10.1.0",
     "react-client": "^1.0.1",
     "react-dom": "^18.3.0-next-f0efa1164-20220901",
     "react-router": "^6.3.0",

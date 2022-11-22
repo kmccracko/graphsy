@@ -6,6 +6,7 @@ import '../styles/index.scss';
 import { prettyLog } from '../util/prettyLog';
 import { algoChoices } from '../util/algoChoices';
 import chooseGrid from '../util/chooseGrid';
+import CodeEditor from './CodeSpace';
 
 const metaStarter = () => {
   return {
@@ -23,7 +24,11 @@ const sleep = (ms: number) => {
 const App = () => {
   // set vars
   const [customAlgoString, setCustomAlgoString] = useState<string>(
-    'alert("Custom function executed!");'
+    `for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < grid[r].length; c++) {
+        await updateScreen({discovered:\`\${r}.\${c}\`})
+      }
+    }`
   );
   const [customGridString, setCustomGridString] = useState<string>(
     '[[1,2,3],[4,5,6],[7,8,9]]'
@@ -160,11 +165,11 @@ const App = () => {
   const handleDefaultFillChange = (e: any) => {
     setDefaultFill(e.target.value);
   };
-  const handleCustomFuncChange = (e: any) => {
-    setCustomAlgoString(e.target.value);
+  const handleCustomFuncChange = (newValue: string) => {
+    setCustomAlgoString(newValue);
   };
-  const handleCustomGridChange = (e: any) => {
-    const cleanStr = e.target.value.replaceAll("'", '"');
+  const handleCustomGridChange = (newValue: string) => {
+    const cleanStr = newValue.replaceAll("'", '"');
     console.log(cleanStr);
     setCustomGridString(cleanStr);
   };
@@ -364,7 +369,7 @@ const App = () => {
                   <span className='elaboration'>{algoDesc}</span>
 
                   <label>Custom Algorithm</label>
-                  <span className='elaboration'>
+                  {/* <span className='elaboration'>
                     {
                       'updateScreen options: current, potential, visited, discovered, grid.'
                     }
@@ -374,16 +379,16 @@ const App = () => {
                   </span>
                   <span className='elaboration mono'>
                     {'async (grid, startPoint, endPoint, updateScreen) => { '}
-                  </span>
-                  <textarea
-                    onChange={handleCustomFuncChange}
-                    value={customAlgoString}
-                  ></textarea>
+                  </span> */}
+                  <CodeEditor
+                    code={customAlgoString}
+                    onChangeCode={handleCustomFuncChange}
+                  />
                   <label>Custom Grid</label>
-                  <textarea
-                    onChange={handleCustomGridChange}
-                    defaultValue={customGridString}
-                  ></textarea>
+                  <CodeEditor
+                    code={customGridString}
+                    onChangeCode={handleCustomGridChange}
+                  />
                   <button onClick={handleCreateGrid}>Create Grid</button>
                   <label>Edit Current Grid</label>
                   <div id='grid-adjust-buttons'>
