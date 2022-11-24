@@ -376,10 +376,10 @@ const App = () => {
                   </span>
                   <span className='elaboration'>
                     {'All options receive a string of "r.c".'}
-                  </span>
+                  </span> */}
                   <span className='elaboration mono'>
                     {'async (grid, startPoint, endPoint, updateScreen) => { '}
-                  </span> */}
+                  </span>
                   <CodeEditor
                     code={customAlgoString}
                     onChangeCode={handleCustomFuncChange}
@@ -433,6 +433,13 @@ const App = () => {
                     onChange={handleDefaultFillChange}
                   ></input>
                 </div>
+                <a
+                  className='social-link'
+                  href='https://github.com/kmccracko/graph-traverse'
+                  target={'blank'}
+                >
+                  Check out this project on Github
+                </a>
               </div>
               <div
                 id='grid'
