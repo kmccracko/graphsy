@@ -21,6 +21,9 @@ const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+// key for use in resetting meta sets. ensures no accidental resets
+const resetKey = Symbol('RESET');
+
 const App = () => {
   // set vars
   const [customAlgoString, setCustomAlgoString] = useState<string>(
@@ -110,12 +113,30 @@ const App = () => {
     // updates meta object to inform classes
     setMeta((meta: any) => {
       const tempObj = { ...meta };
-      if (newMeta.visited !== undefined)
-        tempObj.visited = meta.visited.add(newMeta.visited);
-      if (newMeta.discovered !== undefined)
-        tempObj.discovered = meta.discovered.add(newMeta.discovered);
+
+      // update visited if key exists. if resetKey passed, reset visited
+      // if resetKey, shape should be key: [resetKey, newSetValue] where newSetValue must be a set
+      if (newMeta.visited !== undefined) {
+        console.log(resetKey === newMeta.visited);
+        if (newMeta.visited.length && newMeta.visited[0] === resetKey)
+          tempObj.visited = newMeta.visited[1];
+        else tempObj.visited = meta.visited.add(newMeta.visited);
+      }
+
+      // update discovered if key exists. if resetKey passed, reset discovered
+      // if resetKey, shape should be key: [resetKey, newSetValue] where newSetValue must be a set
+      if (newMeta.discovered !== undefined) {
+        console.log(resetKey === newMeta.discovered);
+        if (newMeta.discovered.length && newMeta.discovered[0] === resetKey)
+          tempObj.discovered = newMeta.discovered[1];
+        else tempObj.discovered = meta.discovered.add(newMeta.discovered);
+      }
+
+      // update potential if key exists
       if (newMeta.potential !== undefined)
         tempObj.potential = newMeta.potential;
+
+      // update current if key exists
       if (newMeta.current !== undefined) tempObj.current = newMeta.current;
       return tempObj;
     });
@@ -150,7 +171,8 @@ const App = () => {
       startPoint,
       endPointStatus && endPoint,
       updateScreen,
-      setAlgoRunning
+      setAlgoRunning,
+      resetKey
     );
   };
 
@@ -224,9 +246,9 @@ const App = () => {
     let newFunc;
     try {
       newFunc = new Function(
-        'grid, start=[1,3], updateScreen, shutOff',
+        'grid, start=[0,0], updateScreen, shutOff',
         `
-        return async (grid, start, end, updateScreen, shutOff) => { 
+        return async (grid, start, end, updateScreen, shutOff, resetKey) => { 
           ${algoString} \n 
           shutOff(false);
         }`
