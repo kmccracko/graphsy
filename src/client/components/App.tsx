@@ -376,6 +376,7 @@ const App = () => {
                     <option>bigEmpty</option>
                     <option>partitions</option>
                     <option>maze</option>
+                    <option>bigmaze</option>
                     <option>custom</option>
                   </select>
 
