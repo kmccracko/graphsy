@@ -150,6 +150,43 @@ button {
       }
     }
   }
+  #var-container {
+    margin-top: 10px;
+    // border: 5px solid black;
+    // max-width: 50vw;
+    // background-color: #8b8b8d;
+    min-width: 18vw;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0px;
+    .var-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      .var-card-title {
+        font-size: larger;
+        // font-weight: bold;
+        // background-color: rgb(0, 0, 0);
+        color: rgb(255, 255, 255);
+        padding: 20px 5px 5px 5px;
+        align-self: stretch;
+      }
+      .var-card-value {
+        display: flex;
+        flex-wrap: wrap;
+        font-size: large;
+        background-color: rgb(255, 255, 255, 0.8);
+        color: rgb(0, 0, 0);
+        padding: 7px 15px;
+        font-family: monospace;
+        align-self: stretch;
+      }
+      .var-number {
+        align-self: center;
+      }
+    }
+  }
 }
 
 #grid {
