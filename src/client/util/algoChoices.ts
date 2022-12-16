@@ -6,6 +6,7 @@ const forfor = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     for (let i = start[0]; i < grid.length; i++) {
@@ -31,6 +32,7 @@ const CountIslands = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     const discovered = new Set();
@@ -100,6 +102,7 @@ const CountIslandsN = {
     grid: [[]] = [[]],
     start: number[],
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     const islandSet: Set<Set<string>> = new Set();
@@ -142,6 +145,7 @@ const BFS = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     // start point
@@ -201,6 +205,7 @@ const DFS = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     const discovered = new Set();
@@ -357,6 +362,7 @@ const solveMazeBFS = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     // start point
@@ -423,6 +429,7 @@ const solveMazeDFS = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     const discovered = new Set();
@@ -474,6 +481,7 @@ const closestCarrot = {
     start: number[],
     end: any = null,
     updateScreen: any = () => {},
+    updateVars: any = () => {},
     shutOff: any = () => {}
   ) => {
     // start point
@@ -551,7 +559,7 @@ export const algoChoices: algoChoices = {
   CountIslands,
   BFS,
   DFS,
-  solveMaze,
+  // solveMaze,
   solveMazeBFS,
   solveMazeDFS,
   closestCarrot,
