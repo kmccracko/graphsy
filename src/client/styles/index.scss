@@ -158,12 +158,17 @@ button {
     min-width: 18vw;
     overflow-y: auto;
     display: flex;
-    flex-direction: column;
+    justify-content: space-evenly;
+    // flex-direction: column;
+    flex-wrap: wrap;
     padding: 10px 0px;
+
     .var-card {
+      width: 100%;
+      margin: 0px 10px 0px 0px;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      // align-items: flex-start;
       .var-card-title {
         font-size: larger;
         // font-weight: bold;
@@ -173,17 +178,26 @@ button {
         align-self: stretch;
       }
       .var-card-value {
-        display: flex;
-        flex-wrap: wrap;
+        // display: flex;
+        // flex-wrap: wrap;
         font-size: large;
         background-color: rgb(255, 255, 255, 0.8);
         color: rgb(0, 0, 0);
         padding: 7px 15px;
         font-family: monospace;
-        align-self: stretch;
+        // width: 95%;
+        // align-self: center;
+        .var-number {
+          font-weight: bold;
+          font-size: x-large;
+        }
       }
-      .var-number {
-        align-self: center;
+      &:has(.var-card-value .var-number) {
+        width: unset;
+        .var-card-value {
+          margin: 0px 5px;
+          text-align: center;
+        }
       }
     }
   }

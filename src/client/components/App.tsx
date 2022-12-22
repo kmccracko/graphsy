@@ -32,6 +32,10 @@ const App = () => {
     `const arr = []
 let counter = 0
 
+// set order of vars in panel (if we want)
+updateVars({counter})
+updateVars({arr})
+
 for (let r = 0; r < grid.length; r++) {
       for (let c = 0; c < grid[r].length; c++) {
         
@@ -40,8 +44,10 @@ for (let r = 0; r < grid.length; r++) {
         arr.push(\`\${r}.\${c}\`)
 
         // update tracked vars in panel
-        updateVars('Visited', arr)
-        updateVars('Counter', counter)
+        updateVars({arr})
+        updateVars({counter})
+
+        // update screen visuals, update grid value
         await updateScreen({discovered:\`\${r}.\${c}\`})
   }
 }
@@ -94,6 +100,13 @@ for (let r = 0; r < grid.length; r++) {
     else setAlgoRunning(false);
   }, [algoRunning]);
 
+  /**
+   * Updates the grid's value at a given coordinate
+   *
+   * @param e event object, e.target.value is new value
+   * @param row row of grid (number)
+   * @param col column of grid (number)
+   */
   const updateGrid = async (e: any, row: number, col: number) => {
     const newValue =
       Number(e.target.value) !== Number(e.target.value) ||
@@ -109,6 +122,21 @@ for (let r = 0; r < grid.length; r++) {
   };
 
   /**
+   * Checks algoRunning state
+   * @returns T/F for "shouldAbort"
+   */
+  const checkForAbort = () => {
+    let shouldAbort = false;
+    // console.log(shouldAbort);
+    setAlgoRunning((keepRunning) => {
+      if (!keepRunning) shouldAbort = true;
+      return keepRunning;
+    });
+    if (shouldAbort) return true;
+    else return false;
+  };
+
+  /**
    *
    * @param newMeta object with new values for meta state. Sets will use the .add method.
    * @param ms Milliseconds to delay after updating screen.
@@ -117,12 +145,7 @@ for (let r = 0; r < grid.length; r++) {
     // check if we should abort, if yes returns 1
     // if "await updateScreen({...})" ever returns 1,
     // the executing function should try to complete itself however it can
-    let shouldAbort = false;
-    setAlgoRunning((keepRunning) => {
-      if (!keepRunning) shouldAbort = true;
-      return keepRunning;
-    });
-    if (shouldAbort) return 1;
+    if (checkForAbort()) return true;
 
     // updates meta object to inform classes
     setMeta((meta: any) => {
@@ -131,7 +154,6 @@ for (let r = 0; r < grid.length; r++) {
       // update visited if key exists. if resetKey passed, reset visited
       // if resetKey, shape should be key: [resetKey, newSetValue] where newSetValue must be a set
       if (newMeta.visited !== undefined) {
-        console.log(resetKey === newMeta.visited);
         if (newMeta.visited.length && newMeta.visited[0] === resetKey)
           tempObj.visited = newMeta.visited[1];
         else tempObj.visited = meta.visited.add(newMeta.visited);
@@ -140,7 +162,6 @@ for (let r = 0; r < grid.length; r++) {
       // update discovered if key exists. if resetKey passed, reset discovered
       // if resetKey, shape should be key: [resetKey, newSetValue] where newSetValue must be a set
       if (newMeta.discovered !== undefined) {
-        console.log(resetKey === newMeta.discovered);
         if (newMeta.discovered.length && newMeta.discovered[0] === resetKey)
           tempObj.discovered = newMeta.discovered[1];
         else tempObj.discovered = meta.discovered.add(newMeta.discovered);
@@ -167,13 +188,17 @@ for (let r = 0; r < grid.length; r++) {
     await sleep(ms);
   };
 
-  const updateVars = async (
-    varKey: string,
-    newValue: any,
-    ms: number = delay
-  ) => {
+  /**
+   *
+   * @param newVarObj Object with key of var name and var value
+   * @param ms Delay time. Global delay unless specified
+   * @returns
+   */
+  const updateVars = async (newVarObj, ms: number = delay) => {
+    if (checkForAbort()) return 1;
     // updates var object to inform var container
     setMeta((meta: any) => {
+      const [varKey, newValue] = Object.entries(newVarObj)[0];
       const tempMeta = { ...meta };
       const tempVarObj = { ...tempMeta.varObj };
 
@@ -232,18 +257,34 @@ for (let r = 0; r < grid.length; r++) {
   };
   const handleCreateGrid = () => {
     if (gridChoice !== 'custom') return;
+
+    let parsedGrid;
+
+    // try to parse json, then try to eval
     try {
-      const parsedGrid = JSON.parse(customGridString);
-      // verify row lengths all match
-      let firstLen = parsedGrid[0].length;
-      for (let row of parsedGrid) {
-        if (row.length !== firstLen)
-          throw new Error('Inconsistent row lengths');
+      parsedGrid = JSON.parse(customGridString);
+    } catch (err) {
+      // if not json, try to use eval
+      try {
+        parsedGrid = eval(customGridString);
+      } catch (err) {
+        // if eval fails, give give both errors?
+        console.log(err);
+        return alert('Could not generate grid. Check console for details.');
       }
-      setCurrentGrid(parsedGrid);
-    } catch (e) {
-      alert(e);
     }
+    // verify this is an array
+    if (!Array.isArray(parsedGrid)) {
+      alert('Input is not an array. Aborting.');
+      return;
+    }
+    // verify row lengths all match
+    let firstLen = parsedGrid[0].length;
+    for (let row of parsedGrid) {
+      if (row.length !== firstLen)
+        alert('Warning: This grid has rows of inequal length.');
+    }
+    setCurrentGrid(parsedGrid);
   };
   const handleGridResize = (adjustments: [number, number]) => {
     let [rowChange, colChange] = adjustments;
@@ -285,11 +326,14 @@ for (let r = 0; r < grid.length; r++) {
         `
         return async (grid, start, end, updateScreen, updateVars, shutOff, resetKey) => { 
           ${algoString} \n 
-          shutOff(false);
+          // shutOff(false);
         }`
       );
-    } catch {
-      alert('Could not generate algorithm. Aborting');
+    } catch (err) {
+      console.log(err);
+      alert(
+        'Could not generate algorithm. Aborting. Check console for details'
+      );
       return newFunc;
     }
     const asyncFunc = newFunc();
@@ -318,21 +362,32 @@ for (let r = 0; r < grid.length; r++) {
                     className={algoRunning ? '' : 'inactive'}
                     onClick={() => setAlgoRunning(false)}
                   >
-                    Abort
+                    Edit
                   </button>
                   <button
                     id='test-btn'
                     onClick={async () => {
-                      await updateVars('NUMber test!', 15);
-                      await updateVars(
-                        'Set Test!',
-                        new Set(['el1', 'EL2', 3, '4!'])
-                      );
-                      await updateVars(
-                        'string testy',
-                        'bazinga, here is a new card!'
-                      );
-                      await updateVars('arraY TEst', [12, 'bongo', 'hi!']);
+                      await updateVars({ 'NUMber test!': 15 });
+                      await updateVars({
+                        'Set Test!': new Set(['el1', 'EL2', 3, '4!']),
+                      });
+                      await updateVars({
+                        'string testy': 'bazinga, here is a new card!',
+                      });
+                      await updateVars({
+                        'arraY TEst': [12, 'bongo', ['one', 'two!'], 'hi!'],
+                      });
+                      await updateVars({
+                        'arraY TEst2': [
+                          ['one', 'two!', 'three, but its kinda long'],
+                          [
+                            'one2',
+                            'two!2',
+                            'three2',
+                            'four2, but its kinda lon2g',
+                          ],
+                        ],
+                      });
                     }}
                   >
                     ADD TEST
