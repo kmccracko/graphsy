@@ -364,34 +364,6 @@ for (let r = 0; r < grid.length; r++) {
                   >
                     Edit
                   </button>
-                  <button
-                    id='test-btn'
-                    onClick={async () => {
-                      await updateVars({ 'NUMber test!': 15 });
-                      await updateVars({
-                        'Set Test!': new Set(['el1', 'EL2', 3, '4!']),
-                      });
-                      await updateVars({
-                        'string testy': 'bazinga, here is a new card!',
-                      });
-                      await updateVars({
-                        'arraY TEst': [12, 'bongo', ['one', 'two!'], 'hi!'],
-                      });
-                      await updateVars({
-                        'arraY TEst2': [
-                          ['one', 'two!', 'three, but its kinda long'],
-                          [
-                            'one2',
-                            'two!2',
-                            'three2',
-                            'four2, but its kinda lon2g',
-                          ],
-                        ],
-                      });
-                    }}
-                  >
-                    ADD TEST
-                  </button>
                 </div>
                 {!algoRunning ? (
                   <div id='options'>
