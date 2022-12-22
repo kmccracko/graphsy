@@ -7,8 +7,6 @@ interface IvarCardProps {
 }
 
 const VarCard = ({ keyName, value, type }: IvarCardProps) => {
-  console.log('Hello from VarCont');
-
   // Represent the data
   let valueRepresentation: any = 'NO MATCH';
   // Number
