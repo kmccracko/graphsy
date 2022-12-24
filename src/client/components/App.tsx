@@ -29,29 +29,7 @@ const resetKey = Symbol('RESET');
 const App = () => {
   // set vars
   const [customAlgoString, setCustomAlgoString] = useState<string>(
-    `const arr = []
-let counter = 0
-
-// set order of vars in panel (if we want)
-updateVars({counter})
-updateVars({arr})
-
-for (let r = 0; r < grid.length; r++) {
-      for (let c = 0; c < grid[r].length; c++) {
-        
-        // update vars in code
-        counter++
-        arr.push(\`\${r}.\${c}\`)
-
-        // update tracked vars in panel
-        updateVars({arr})
-        updateVars({counter})
-
-        // update screen visuals, update grid value
-        await updateScreen({discovered:\`\${r}.\${c}\`})
-  }
-}
-    `
+    algoChoices['forfor']
   );
   const [customGridString, setCustomGridString] = useState<string>(
     '[[1,2,3],[4,5,6],[7,8,9]]'
@@ -78,7 +56,8 @@ for (let r = 0; r < grid.length; r++) {
     let desc: string = 'Custom Function!',
       endPoint: boolean = true;
 
-    if (algoChoice !== 'custom') ({ desc, endPoint } = algoChoices[algoChoice]);
+    let funcStr;
+    if (algoChoice !== 'custom') funcStr = algoChoices[algoChoice];
 
     setAlgoDesc(desc);
     setEndPointStatus(endPoint);
@@ -219,7 +198,7 @@ for (let r = 0; r < grid.length; r++) {
     let func: Function;
 
     if (algoChoice === 'custom') func = buildAlgo(customAlgoString);
-    else ({ func } = algoChoices[algoChoice]);
+    else func = buildAlgo(customAlgoString);
 
     setMeta(() => metaStarter());
     await sleep(100);
@@ -238,6 +217,7 @@ for (let r = 0; r < grid.length; r++) {
 
   const handleAlgoSelect = (e: any) => {
     setAlgoChoice(e.target.value);
+    handleCustomFuncChange(algoChoices[e.target.value]);
   };
 
   const handleGridSelect = (e: any) => {
@@ -448,29 +428,37 @@ for (let r = 0; r < grid.length; r++) {
                       </div>
                     )}
 
-                    <label>Select Grid *</label>
-                    <select onChange={handleGridSelect} value={gridChoice}>
-                      <option>anchor</option>
-                      <option>grid1</option>
-                      <option>bigEmpty</option>
-                      <option>partitions</option>
-                      <option>maze</option>
-                      <option>bigmaze</option>
-                      <option>custom</option>
-                    </select>
+                    <div id='select-container-outer'>
+                      <div className='select-container-inner'>
+                        <label>Select Grid *</label>
+                        <select onChange={handleGridSelect} value={gridChoice}>
+                          <option>anchor</option>
+                          <option>grid1</option>
+                          <option>bigEmpty</option>
+                          <option>partitions</option>
+                          <option>maze</option>
+                          <option>bigmaze</option>
+                          <option>custom</option>
+                        </select>
+                      </div>
 
-                    <label>Select Algorithm *</label>
-                    <select onChange={handleAlgoSelect} value={algoChoice}>
-                      {Object.keys(algoChoices).map((el: any, i: number) => {
-                        return <option key={i}>{el}</option>;
-                      })}
-                      <option>custom</option>
-                    </select>
+                      <div className='select-container-inner'>
+                        <label>Select Algo *</label>
+                        <select onChange={handleAlgoSelect} value={algoChoice}>
+                          {Object.keys(algoChoices).map(
+                            (el: any, i: number) => {
+                              return <option key={i}>{el}</option>;
+                            }
+                          )}
+                          {/* <option>custom</option> */}
+                        </select>
+                      </div>
+                    </div>
 
-                    <label>Algo Description:</label>
+                    <label>Algorithm:</label>
                     <span className='elaboration'>{algoDesc}</span>
 
-                    <label>Custom Algorithm</label>
+                    {/* <label>Custom Algorithm</label> */}
                     {/* <span className='elaboration'>
                     {
                       'updateScreen options: current, potential, visited, discovered, grid.'
@@ -479,16 +467,19 @@ for (let r = 0; r < grid.length; r++) {
                   <span className='elaboration'>
                     {'All options receive a string of "r.c".'}
                   </span> */}
-                    <span className='elaboration mono'>
+                    {/* <span className='elaboration mono'>
                       {
                         'async (grid, startPoint, endPoint, updateScreen, updateVars) => { '
                       }
-                    </span>
+                    </span> */}
                     <CodeEditor
                       code={customAlgoString}
                       onChangeCode={handleCustomFuncChange}
                     />
                     <label>Custom Grid</label>
+                    <span className='elaboration'>
+                      JSON or JS code. Must generate a nested array.
+                    </span>
                     <CodeEditor
                       code={customGridString}
                       onChangeCode={handleCustomGridChange}
