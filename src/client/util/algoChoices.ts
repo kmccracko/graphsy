@@ -1,14 +1,5 @@
-import { prettyLog } from './prettyLog';
-
-// const params = 'grid=[[]], start, end=null, updateScreen, updateVars';
-const updateScreen: (...args) => boolean = (...args) => {
-  return false;
-};
-const grid = [[]];
-const start = [0, 0];
-const shutOff = (a) => {};
-
-const forfor = `
+const nestedForLoop = {
+  func: `
 for (let i = start[0]; i < grid.length; i++) {
   for (let j = start[1]; j < grid[i].length; j++) {
     if (
@@ -18,9 +9,12 @@ for (let i = start[0]; i < grid.length; i++) {
     )
       return;
   }
-}`;
+}`,
+  desc: 'Uses nested for loops to iterate through array. Ignores walls ("W").',
+};
 
-const forforWithVars = `
+const nestedForLoopWithVars = {
+  func: `
 const arr = []
 let counter = 0
 
@@ -42,10 +36,12 @@ for (let r = 0; r < grid.length; r++) {
     // update screen visuals, update grid value
     await updateScreen({discovered:\`\${r}.\${c}\`})
   }
-}
-    `;
+}`,
+  desc: 'Uses nested for loops to iterate through array. Ignores walls ("W"). Tracks variables of interest.',
+};
 
-const CountIslands = `
+const countIslands = {
+  func: `
 const discovered = new Set();
 let islandCount = 0;
 
@@ -100,10 +96,12 @@ for (let i = start[0]; i < grid.length; i++) {
     });
   }
 }
-alert(islandCount);
-`;
+alert(islandCount);`,
+  desc: 'Uses depth-first recursion to traverse islands (groups of consecutive 1s) entirely when found. Ignores walls ("W").',
+};
 
-const BFS = `
+const BFS_breadthFirst = {
+  func: `
 // start point
 let [r, c] = start;
 // queue
@@ -147,10 +145,12 @@ while (queue.length) {
       queue.unshift(\`\${r}.\${c}\`);
     }
   }
-}
-`;
+}`,
+  desc: 'Breadth-first Search. Uses a queue. Traverses everything, ignores walls ("W").',
+};
 
-const DFS = `
+const DFS_depthFirst = {
+  func: `
 const discovered = new Set();
 
 const findMore = async (i, j) => {
@@ -178,123 +178,12 @@ const findMore = async (i, j) => {
     });
   }
 };
-await findMore(start[0], start[1]);
-`;
+await findMore(start[0], start[1]);`,
+  desc: 'Depth-first Search. Uses recursion stacks. Traverses everything, ignores walls ("W").',
+};
 
-// const solveMaze = {
-//   func: async (
-//     grid: [[]] = [[]],
-//     start: number[],
-//     end: any = null,
-//     updateScreen: any = () => {},
-//     shutOff: any = () => {}
-//   ) => {
-//     async function initMaze(maze) {
-//       // base case 1 : maze empty
-//       if (!maze || !maze[0]) return 'Maze is empty!';
-
-//       // init constants
-//       const maxY = maze.length;
-//       const maxX = maze[0].length;
-
-//       return await navigate(maze, maxX, maxY);
-//     }
-
-//     async function navigate(
-//       maze,
-//       maxX,
-//       maxY,
-//       curX = start[1],
-//       curY = start[0],
-//       intersections = [0, { 0: [0, 0] }],
-//       counter = 0
-//     ) {
-//       await updateScreen({
-//         discovered: `${curY}.${curX}`,
-//       });
-//       // base case 2: maze complete!
-//       if (curX + 1 === maxX && curY + 1 === maxY)
-//         return `Wahoo! Maze solved. Done in ${counter} steps.`;
-
-//       // else, update intersections, pick a direction
-//       // if no directions available, move to most recent in intersections.
-//       let choices = await checkDirs(maze, curY, curX, maxY, maxX, 'checking');
-
-//       let newY,
-//         newX = 0;
-//       if (choices > 0) {
-//         if (choices > 1) {
-//           // if multiple options available, add it to list
-//           // then update using first direction available
-//           typeof intersections[0] === 'number' && intersections[0]++;
-//           intersections[1][String(intersections[0])] = [curY, curX];
-//         }
-//         // if at least 1 option, take first available
-//         [newY, newX] = await checkDirs(maze, curY, curX, maxY, maxX, 'go');
-
-//         // update new space to counter number
-//         maze[newY][newX] = String(counter + 1);
-//       } else {
-//         // if no options, go back to the most recent intersection, then remove that option
-
-//         [newY, newX] = intersections[1][String(intersections[0])];
-//         delete intersections[1][String(intersections[0])];
-//         typeof intersections[0] === 'number' && intersections[0]--;
-//       }
-
-//       // base case 3 : dead end, no intersections left
-//       if (choices === 0 && intersections[0] === 0) {
-//         return 'Exhausted everything! ' + counter;
-//       }
-
-//       // recurse!
-//       return navigate(maze, maxX, maxY, newX, newY, intersections, counter + 1);
-//     }
-
-//     async function checkDirs(
-//       maze,
-//       curY,
-//       curX,
-//       maxY,
-//       maxX,
-//       checkType
-//     ): Promise<any> {
-//       let choices = 0;
-
-//       for (let dir of directions) {
-//         // if current direction is viable
-//         if (
-//           curY + dir[0] < maxY &&
-//           curY + dir[0] >= 0 &&
-//           curX + dir[1] < maxX &&
-//           curX + dir[1] >= 0 &&
-//           maze[curY + dir[0]][curX + dir[1]] === ''
-//         ) {
-//           // if now moving, return when possible
-//           // increment intersect regardless
-//           if (checkType === 'go') return [curY + dir[0], curX + dir[1]];
-//           choices++;
-//         }
-//       }
-//       return choices;
-//     }
-
-//     const directions = [
-//       [1, 0],
-//       [0, 1],
-//       [0, -1],
-//       [-1, 0],
-//     ];
-
-//     initMaze(grid);
-
-//     shutOff(false);
-//   },
-//   desc: 'Solves a maze using DFS but makes note of intersections. Walls ("W") matter.',
-//   endPoint: false,
-// };
-
-const solveMazeBFS = `
+const solveMazeBFS = {
+  func: `
 // start point
 let [r, c] = start;
 // queue
@@ -345,10 +234,12 @@ while (queue.length) {
       queue.unshift(\`\${r}.\${c}\`);
     }
   }
-}
-`;
+}`,
+  desc: 'Solves a maze using naive Breadth-first Search. Endpoint required. Walls ("W") matter.',
+};
 
-const solveMazeDFS = `
+const solveMazeDFS = {
+  func: `
 const discovered = new Set();
 
 const findMore = async (i, j) => {
@@ -384,10 +275,12 @@ const findMore = async (i, j) => {
     });
   }
 };
-await findMore(start[0], start[1]);
-`;
+await findMore(start[0], start[1]);`,
+  desc: 'Solves a maze using naive Depth-first Search. Endpoint required. Walls ("W") matter.',
+};
 
-const closestCarrot = `
+const closestCarrot = {
+  func: `
 // start point
 let [r, c] = start;
 // queue
@@ -441,24 +334,24 @@ while (queue.length) {
     }
   }
 }
-alert(shortestPath);
-`;
+alert(shortestPath);`,
+  desc: 'Finds the closest "C" using Breadth-first Search and returns shortest path to it. Walls ("W") matter.',
+};
 
 interface algoChoice {
-  func: Function;
+  func: string;
   desc: string;
-  endPoint: boolean;
 }
 interface algoChoices {
-  [key: string]: string;
+  [key: string]: algoChoice;
 }
 
 export const algoChoices: algoChoices = {
-  forfor,
-  forforWithVars,
-  CountIslands,
-  BFS,
-  DFS,
+  nestedForLoop,
+  nestedForLoopWithVars,
+  countIslands,
+  BFS_breadthFirst,
+  DFS_depthFirst,
   solveMazeBFS,
   solveMazeDFS,
   closestCarrot,

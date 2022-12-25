@@ -28,23 +28,19 @@ const resetKey = Symbol('RESET');
 
 const App = () => {
   // set vars
-  const [customAlgoString, setCustomAlgoString] = useState<string>(
-    algoChoices['forfor']
-  );
+  const [customAlgoString, setCustomAlgoString] = useState<string>('');
   const [customGridString, setCustomGridString] = useState<string>(
     '[[1,2,3],[4,5,6],[7,8,9]]'
   );
   const [defaultFill, setDefaultFill] = useState<string>('');
 
-  const [algoChoice, setAlgoChoice] = useState<string>('forfor');
+  const [algoChoice, setAlgoChoice] = useState<string>('nestedForLoop');
   const [algoDesc, setAlgoDesc] = useState<string>('');
   const [gridChoice, setGridChoice] = useState<string>('maze');
   const [currentGrid, setCurrentGrid] = useState<any[][]>([[]]);
-  const [currentAlgo, setCurrentAlgo] = useState<any>(false);
   const [algoRunning, setAlgoRunning] = useState<boolean>(false);
   const [startPoint, setStartPoint] = useState<number[]>([0, 0]);
   const [endPoint, setEndPoint] = useState<number[]>([0, 0]);
-  const [endPointStatus, setEndPointStatus] = useState<boolean>(false);
   const [delay, setDelay] = useState<number>(10);
   const [meta, setMeta] = useState<any>(metaStarter());
 
@@ -53,23 +49,13 @@ const App = () => {
   }, [gridChoice]);
 
   useEffect(() => {
-    let desc: string = 'Custom Function!',
-      endPoint: boolean = true;
-
-    let funcStr;
-    if (algoChoice !== 'custom') funcStr = algoChoices[algoChoice];
-
+    let { func, desc } = algoChoices[algoChoice];
+    setCustomAlgoString(func);
     setAlgoDesc(desc);
-    setEndPointStatus(endPoint);
   }, [algoChoice]);
 
   useEffect(() => {
-    if (endPointStatus) {
-      setEndPoint([currentGrid.length - 1, currentGrid[0].length - 1]);
-    }
-  }, [currentGrid, endPointStatus]);
-
-  useEffect(() => {
+    setEndPoint([currentGrid.length - 1, currentGrid[0].length - 1]);
     if (!algoRunning) setMeta(() => metaStarter());
   }, [currentGrid]);
 
@@ -195,10 +181,7 @@ const App = () => {
    * Invoke currentAlgo function and provide it with params from current state
    */
   const runAlgo = async () => {
-    let func: Function;
-
-    if (algoChoice === 'custom') func = buildAlgo(customAlgoString);
-    else func = buildAlgo(customAlgoString);
+    const func = buildAlgo(customAlgoString);
 
     setMeta(() => metaStarter());
     await sleep(100);
@@ -207,7 +190,7 @@ const App = () => {
     func(
       currentGrid,
       startPoint,
-      endPointStatus && endPoint,
+      endPoint,
       updateScreen,
       updateVars,
       setAlgoRunning,
@@ -217,7 +200,7 @@ const App = () => {
 
   const handleAlgoSelect = (e: any) => {
     setAlgoChoice(e.target.value);
-    handleCustomFuncChange(algoChoices[e.target.value]);
+    handleCustomFuncChange(algoChoices[e.target.value].func);
   };
 
   const handleGridSelect = (e: any) => {
@@ -327,7 +310,7 @@ const App = () => {
           path='/'
           element={
             <div id='main2'>
-              <div className='panel'>
+              <div id='panel'>
                 <h1>Graphsy</h1>
                 <div id='start-stop-buttons'>
                   <button
@@ -367,7 +350,7 @@ const App = () => {
                     <div className='coordinate-set'>
                       <label>Start</label>
                       <div className='coordinate'>
-                        <label>Row</label>
+                        <label className='sublabel'>Row</label>
                         <input
                           type={'text'}
                           defaultValue={startPoint[0]}
@@ -381,7 +364,7 @@ const App = () => {
                       </div>
 
                       <div className='coordinate'>
-                        <label>Column</label>
+                        <label className='sublabel'>Column</label>
                         <input
                           type={'text'}
                           defaultValue={startPoint[1]}
@@ -395,11 +378,11 @@ const App = () => {
                       </div>
                     </div>
 
-                    {endPointStatus && (
+                    {
                       <div className='coordinate-set'>
-                        <label>End</label>
+                        <label>End&nbsp;&nbsp;</label>
                         <div className='coordinate'>
-                          <label>Row</label>
+                          <label className='sublabel'>Row</label>
                           <input
                             type={'text'}
                             value={endPoint[0]}
@@ -413,7 +396,7 @@ const App = () => {
                         </div>
 
                         <div className='coordinate'>
-                          <label>Column</label>
+                          <label className='sublabel'>Column</label>
                           <input
                             type={'text'}
                             value={endPoint[1]}
@@ -426,11 +409,11 @@ const App = () => {
                           ></input>
                         </div>
                       </div>
-                    )}
+                    }
 
                     <div id='select-container-outer'>
                       <div className='select-container-inner'>
-                        <label>Select Grid *</label>
+                        <label>Select Grid</label>
                         <select onChange={handleGridSelect} value={gridChoice}>
                           <option>anchor</option>
                           <option>grid1</option>
@@ -443,35 +426,20 @@ const App = () => {
                       </div>
 
                       <div className='select-container-inner'>
-                        <label>Select Algo *</label>
+                        <label>Select Algo</label>
                         <select onChange={handleAlgoSelect} value={algoChoice}>
                           {Object.keys(algoChoices).map(
                             (el: any, i: number) => {
                               return <option key={i}>{el}</option>;
                             }
                           )}
-                          {/* <option>custom</option> */}
                         </select>
                       </div>
                     </div>
 
-                    <label>Algorithm:</label>
+                    <label>Algorithm</label>
                     <span className='elaboration'>{algoDesc}</span>
 
-                    {/* <label>Custom Algorithm</label> */}
-                    {/* <span className='elaboration'>
-                    {
-                      'updateScreen options: current, potential, visited, discovered, grid.'
-                    }
-                  </span>
-                  <span className='elaboration'>
-                    {'All options receive a string of "r.c".'}
-                  </span> */}
-                    {/* <span className='elaboration mono'>
-                      {
-                        'async (grid, startPoint, endPoint, updateScreen, updateVars) => { '
-                      }
-                    </span> */}
                     <CodeEditor
                       code={customAlgoString}
                       onChangeCode={handleCustomFuncChange}
@@ -486,47 +454,56 @@ const App = () => {
                     />
                     <button onClick={handleCreateGrid}>Create Grid</button>
                     <label>Edit Current Grid</label>
-                    <div id='grid-adjust-buttons'>
-                      <div className='space'></div>
-                      <button
-                        className={`btn-small ${
-                          currentGrid.length < 2 ? 'inactive' : ''
-                        }`}
-                        onClick={() => handleGridResize([-1, 0])}
-                      >
-                        - Row
-                      </button>
-                      <div className='space'></div>
-                      <button
-                        className={`btn-small ${
-                          currentGrid[0].length < 2 ? 'inactive' : ''
-                        }`}
-                        onClick={() => handleGridResize([0, -1])}
-                      >
-                        - Col
-                      </button>
-                      <div className='box'></div>
-                      <button
-                        className='btn-small'
-                        onClick={() => handleGridResize([0, 1])}
-                      >
-                        + Col
-                      </button>
-                      <div className=''></div>
-                      <button
-                        className='btn-small'
-                        onClick={() => handleGridResize([1, 0])}
-                      >
-                        + Row
-                      </button>
-                      <div className=''></div>
+
+                    <div className='fl-col'>
+                      <div className='fl-col'>
+                        <label className='sublabel'>Adjust Grid Size</label>
+                        <div className='fl-row fl-center-h'>
+                          <div className='fl-row grid-adj'>
+                            <button
+                              className={`btn-small minus ${
+                                currentGrid.length < 2 ? 'inactive' : ''
+                              }`}
+                              onClick={() => handleGridResize([-1, 0])}
+                            >
+                              - Row
+                            </button>
+                            <button
+                              className='btn-small plus'
+                              onClick={() => handleGridResize([1, 0])}
+                            >
+                              + Row
+                            </button>
+                          </div>
+                          <div className='fl-row grid-adj'>
+                            <button
+                              className={`btn-small minus ${
+                                currentGrid[0].length < 2 ? 'inactive' : ''
+                              }`}
+                              onClick={() => handleGridResize([0, -1])}
+                            >
+                              - Col
+                            </button>
+                            <button
+                              className='btn-small plus'
+                              onClick={() => handleGridResize([0, 1])}
+                            >
+                              + Col
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className='fl-col fl-center-h'>
+                        <label className='sublabel'>New Cell Fill</label>
+                        <input
+                          id='fill-cell'
+                          type='text'
+                          value={defaultFill}
+                          onChange={handleDefaultFillChange}
+                        ></input>
+                      </div>
                     </div>
-                    <label>New Cell Filler</label>
-                    <input
-                      type='text'
-                      value={defaultFill}
-                      onChange={handleDefaultFillChange}
-                    ></input>
                   </div>
                 ) : (
                   <VarContainer vars={meta.varObj} />
