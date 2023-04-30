@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Row from './Row';
 
@@ -43,6 +43,9 @@ const App = () => {
   const [endPoint, setEndPoint] = useState<number[]>([0, 0]);
   const [delay, setDelay] = useState<number>(10);
   const [meta, setMeta] = useState<any>(metaStarter());
+  const [pausedState, setPausedState] = useState<boolean>(false);
+
+  let stopStatus = useRef({ isPaused: 1, isAborted: 1 });
 
   useEffect(() => {
     if (gridChoice !== 'custom') setCurrentGrid(chooseGrid(gridChoice));
@@ -61,8 +64,15 @@ const App = () => {
 
   useEffect(() => {
     console.log('algoRunning changed! is now', algoRunning);
-    if (algoRunning && algoChoice) runAlgo();
-    else setAlgoRunning(false);
+    if (algoRunning && algoChoice) {
+      stopStatus.current.isAborted = 0;
+      stopStatus.current.isPaused = 0;
+      runAlgo();
+    } else {
+      stopStatus.current.isAborted = 1;
+      stopStatus.current.isPaused = 1;
+      setAlgoRunning(false);
+    }
   }, [algoRunning]);
 
   /**
@@ -86,19 +96,23 @@ const App = () => {
     });
   };
 
-  /**
-   * Checks algoRunning state
-   * @returns T/F for "shouldAbort"
-   */
   const checkForAbort = () => {
-    let shouldAbort = false;
-    // console.log(shouldAbort);
-    setAlgoRunning((keepRunning) => {
-      if (!keepRunning) shouldAbort = true;
-      return keepRunning;
-    });
-    if (shouldAbort) return true;
-    else return false;
+    if (stopStatus.current.isAborted) {
+      setAlgoRunning(false);
+      return true;
+    }
+  };
+
+  const checkForPause = async () => {
+    while (stopStatus.current.isPaused) {
+      if (stopStatus.current.isPaused) {
+        setPausedState(true);
+        if (checkForAbort()) return true;
+        console.log('paused...');
+        await sleep(200);
+      }
+    }
+    setPausedState(false);
   };
 
   /**
@@ -111,6 +125,7 @@ const App = () => {
     // if "await updateScreen({...})" ever returns 1,
     // the executing function should try to complete itself however it can
     if (checkForAbort()) return true;
+    await checkForPause();
 
     // updates meta object to inform classes
     setMeta((meta: any) => {
@@ -160,7 +175,9 @@ const App = () => {
    * @returns
    */
   const updateVars = async (newVarObj, ms: number = delay) => {
-    if (checkForAbort()) return 1;
+    if (checkForAbort()) return true;
+    await checkForPause();
+
     // updates var object to inform var container
     setMeta((meta: any) => {
       const [varKey, newValue] = Object.entries(newVarObj)[0];
@@ -289,7 +306,7 @@ const App = () => {
         `
         return async (grid, start, end, updateScreen, updateVars, shutOff, resetKey) => { 
           ${algoString} \n 
-          // shutOff(false);
+          shutOff(false)
         }`
       );
     } catch (err) {
@@ -312,22 +329,34 @@ const App = () => {
             <div id='main2'>
               <div id='panel'>
                 <h1>Graphsy</h1>
-                <div id='start-stop-buttons'>
-                  <button
-                    id='start-btn'
-                    className={algoRunning ? 'inactive' : ''}
-                    onClick={() => setAlgoRunning(true)}
-                  >
-                    Run
-                  </button>
-                  <button
-                    id='stop-btn'
-                    className={algoRunning ? '' : 'inactive'}
-                    onClick={() => setAlgoRunning(false)}
-                  >
-                    Edit
-                  </button>
-                </div>
+                {!algoRunning ? (
+                  <div id='start-stop-buttons'>
+                    <button
+                      id='start-btn'
+                      className={algoRunning ? 'inactive' : ''}
+                      onClick={() => setAlgoRunning(true)}
+                    >
+                      Run
+                    </button>
+                  </div>
+                ) : (
+                  <div id='start-stop-buttons'>
+                    <button
+                      id='stop-btn'
+                      className={algoRunning ? '' : 'inactive'}
+                      onClick={() => (stopStatus.current.isAborted ^= 1)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      id='pause-btn'
+                      className={algoRunning ? '' : 'inactive'}
+                      onClick={() => (stopStatus.current.isPaused ^= 1)}
+                    >
+                      {pausedState ? 'Unpause' : 'Pause'}
+                    </button>
+                  </div>
+                )}
                 {!algoRunning ? (
                   <div id='options'>
                     <label>Set Delay (ms)</label>
