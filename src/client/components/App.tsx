@@ -3,25 +3,14 @@ import { Routes, Route } from 'react-router-dom';
 import Row from './Row';
 
 import '../styles/index.scss';
+import { metaStarter } from '../util/metaStarter';
+import { sleep } from '../util/sleep';
 import { prettyLog } from '../util/prettyLog';
 import { algoChoices } from '../util/algoChoices';
 import chooseGrid from '../util/chooseGrid';
-import CodeEditor from './CodeSpace';
 import VarContainer from './varTracking/VarContainer';
-
-const metaStarter = () => {
-  return {
-    current: ``,
-    potential: ``,
-    visited: new Set(),
-    discovered: new Set(),
-    varObj: {},
-  };
-};
-
-const sleep = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
+import ControlButtons from './ControlButtons';
+import PanelOptions from './PanelOptions';
 
 // key for use in resetting meta sets. ensures no accidental resets
 const resetKey = Symbol('RESET');
@@ -215,15 +204,58 @@ const App = () => {
     );
   };
 
+  /**
+   *
+   * Updates currentAlgo with a func generated from user input.
+   *
+   * Takes user's input and wraps it in a function that returns an async function.
+   *
+   * We generate the outer function, then invoke it and pass the returned async function as the new currentAlgo.
+   */
+  const buildAlgo = (algoString: string) => {
+    console.log(algoString);
+    let newFunc;
+    try {
+      newFunc = new Function(
+        'grid, start=[0,0], end, updateScreen, updateVars, shutOff, resetKey',
+        `
+        return async (grid, start, end, updateScreen, updateVars, shutOff, resetKey) => { 
+          ${algoString} \n 
+          shutOff(false)
+        }`
+      );
+    } catch (err) {
+      console.log(err);
+      alert(
+        'Could not generate algorithm. Aborting. Check console for details'
+      );
+      return newFunc;
+    }
+    const asyncFunc = newFunc();
+    return asyncFunc;
+  };
+
+  // control button functions
+  const handleStart = () => setAlgoRunning(true);
+  const handleAbort = () => (stopStatus.current.isAborted ^= 1);
+  const handlePause = () => (stopStatus.current.isPaused ^= 1);
+
+  // options functions
+  const handleDelayChange = (e) => setDelay(Number(e.target.value));
+  const handlePointChange = (pos, value, type) => {
+    let [point, setter] = [startPoint, setStartPoint];
+    if (type === 'e') [point, setter] = [endPoint, setEndPoint];
+    const newArr = [...point];
+    newArr[pos] = value;
+    setter(newArr);
+  };
   const handleAlgoSelect = (e: any) => {
     setAlgoChoice(e.target.value);
     handleCustomFuncChange(algoChoices[e.target.value].func);
   };
-
   const handleGridSelect = (e: any) => {
     setGridChoice(e.target.value);
   };
-
   const handleDefaultFillChange = (e: any) => {
     setDefaultFill(e.target.value);
   };
@@ -289,37 +321,6 @@ const App = () => {
     setCurrentGrid(newGrid);
   };
 
-  /**
-   *
-   * Updates currentAlgo with a func generated from user input.
-   *
-   * Takes user's input and wraps it in a function that returns an async function.
-   *
-   * We generate the outer function, then invoke it and pass the returned async function as the new currentAlgo.
-   */
-  const buildAlgo = (algoString: string) => {
-    console.log(algoString);
-    let newFunc;
-    try {
-      newFunc = new Function(
-        'grid, start=[0,0], end, updateScreen, updateVars, shutOff, resetKey',
-        `
-        return async (grid, start, end, updateScreen, updateVars, shutOff, resetKey) => { 
-          ${algoString} \n 
-          shutOff(false)
-        }`
-      );
-    } catch (err) {
-      console.log(err);
-      alert(
-        'Could not generate algorithm. Aborting. Check console for details'
-      );
-      return newFunc;
-    }
-    const asyncFunc = newFunc();
-    return asyncFunc;
-  };
-
   return (
     <div id='Main'>
       <Routes>
@@ -329,211 +330,36 @@ const App = () => {
             <div id='main2'>
               <div id='panel'>
                 <h1>Graphsy</h1>
+                <ControlButtons
+                  algoRunning={algoRunning}
+                  pausedState={pausedState}
+                  handleStart={handleStart}
+                  handleAbort={handleAbort}
+                  handlePause={handlePause}
+                />
                 {!algoRunning ? (
-                  <div id='start-stop-buttons'>
-                    <button
-                      id='start-btn'
-                      className={algoRunning ? 'inactive' : ''}
-                      onClick={() => setAlgoRunning(true)}
-                    >
-                      Run
-                    </button>
-                  </div>
-                ) : (
-                  <div id='start-stop-buttons'>
-                    <button
-                      id='stop-btn'
-                      className={algoRunning ? '' : 'inactive'}
-                      onClick={() => (stopStatus.current.isAborted ^= 1)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      id='pause-btn'
-                      className={algoRunning ? '' : 'inactive'}
-                      onClick={() => (stopStatus.current.isPaused ^= 1)}
-                    >
-                      {pausedState ? 'Unpause' : 'Pause'}
-                    </button>
-                  </div>
-                )}
-                {!algoRunning ? (
-                  <div id='options'>
-                    <label>Set Delay (ms)</label>
-                    <select
-                      defaultValue={delay}
-                      onChange={(e) => {
-                        setDelay(Number(e.target.value));
-                      }}
-                    >
-                      <option>10</option>
-                      <option>50</option>
-                      <option>100</option>
-                      <option>200</option>
-                      <option>500</option>
-                      <option>800</option>
-                      <option>1000</option>
-                      <option>2000</option>
-                    </select>
-
-                    <div className='coordinate-set'>
-                      <label>Start</label>
-                      <div className='coordinate'>
-                        <label className='sublabel'>Row</label>
-                        <input
-                          type={'text'}
-                          defaultValue={startPoint[0]}
-                          onChange={(e) => {
-                            setStartPoint((current) => [
-                              Number(e.target.value),
-                              current[1],
-                            ]);
-                          }}
-                        ></input>
-                      </div>
-
-                      <div className='coordinate'>
-                        <label className='sublabel'>Column</label>
-                        <input
-                          type={'text'}
-                          defaultValue={startPoint[1]}
-                          onChange={(e) => {
-                            setStartPoint((current) => [
-                              current[0],
-                              Number(e.target.value),
-                            ]);
-                          }}
-                        ></input>
-                      </div>
-                    </div>
-
-                    {
-                      <div className='coordinate-set'>
-                        <label>End&nbsp;&nbsp;</label>
-                        <div className='coordinate'>
-                          <label className='sublabel'>Row</label>
-                          <input
-                            type={'text'}
-                            value={endPoint[0]}
-                            onChange={(e) => {
-                              setEndPoint((current) => [
-                                Number(e.target.value),
-                                current[1],
-                              ]);
-                            }}
-                          ></input>
-                        </div>
-
-                        <div className='coordinate'>
-                          <label className='sublabel'>Column</label>
-                          <input
-                            type={'text'}
-                            value={endPoint[1]}
-                            onChange={(e) => {
-                              setEndPoint((current) => [
-                                current[0],
-                                Number(e.target.value),
-                              ]);
-                            }}
-                          ></input>
-                        </div>
-                      </div>
-                    }
-
-                    <div id='select-container-outer'>
-                      <div className='select-container-inner'>
-                        <label>Select Grid</label>
-                        <select onChange={handleGridSelect} value={gridChoice}>
-                          <option>anchor</option>
-                          <option>grid1</option>
-                          <option>bigEmpty</option>
-                          <option>partitions</option>
-                          <option>maze</option>
-                          <option>bigmaze</option>
-                          <option>custom</option>
-                        </select>
-                      </div>
-
-                      <div className='select-container-inner'>
-                        <label>Select Algo</label>
-                        <select onChange={handleAlgoSelect} value={algoChoice}>
-                          {Object.keys(algoChoices).map(
-                            (el: any, i: number) => {
-                              return <option key={i}>{el}</option>;
-                            }
-                          )}
-                        </select>
-                      </div>
-                    </div>
-
-                    <label>Algorithm</label>
-                    <span className='elaboration'>{algoDesc}</span>
-
-                    <CodeEditor
-                      code={customAlgoString}
-                      onChangeCode={handleCustomFuncChange}
-                    />
-                    <label>Custom Grid</label>
-                    <span className='elaboration'>
-                      JSON or JS code. Must generate a nested array.
-                    </span>
-                    <CodeEditor
-                      code={customGridString}
-                      onChangeCode={handleCustomGridChange}
-                    />
-                    <button onClick={handleCreateGrid}>Create Grid</button>
-                    <label>Edit Current Grid</label>
-
-                    <div className='fl-col'>
-                      <div className='fl-col'>
-                        <label className='sublabel'>Adjust Grid Size</label>
-                        <div className='fl-row fl-center-h'>
-                          <div className='fl-row grid-adj'>
-                            <button
-                              className={`btn-small minus ${
-                                currentGrid.length < 2 ? 'inactive' : ''
-                              }`}
-                              onClick={() => handleGridResize([-1, 0])}
-                            >
-                              - Row
-                            </button>
-                            <button
-                              className='btn-small plus'
-                              onClick={() => handleGridResize([1, 0])}
-                            >
-                              + Row
-                            </button>
-                          </div>
-                          <div className='fl-row grid-adj'>
-                            <button
-                              className={`btn-small minus ${
-                                currentGrid[0].length < 2 ? 'inactive' : ''
-                              }`}
-                              onClick={() => handleGridResize([0, -1])}
-                            >
-                              - Col
-                            </button>
-                            <button
-                              className='btn-small plus'
-                              onClick={() => handleGridResize([0, 1])}
-                            >
-                              + Col
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className='fl-col fl-center-h'>
-                        <label className='sublabel'>New Cell Fill</label>
-                        <input
-                          id='fill-cell'
-                          type='text'
-                          value={defaultFill}
-                          onChange={handleDefaultFillChange}
-                        ></input>
-                      </div>
-                    </div>
-                  </div>
+                  <PanelOptions
+                    delay={delay}
+                    startPoint={startPoint}
+                    endPoint={endPoint}
+                    gridChoice={gridChoice}
+                    algoChoice={algoChoice}
+                    algoChoices={algoChoices}
+                    algoDesc={algoDesc}
+                    customAlgoString={customAlgoString}
+                    customGridString={customGridString}
+                    currentGrid={currentGrid}
+                    defaultFill={defaultFill}
+                    handleDelayChange={handleDelayChange}
+                    handlePointChange={handlePointChange}
+                    handleGridSelect={handleGridSelect}
+                    handleAlgoSelect={handleAlgoSelect}
+                    handleCustomFuncChange={handleCustomFuncChange}
+                    handleCustomGridChange={handleCustomGridChange}
+                    handleCreateGrid={handleCreateGrid}
+                    handleGridResize={handleGridResize}
+                    handleDefaultFillChange={handleDefaultFillChange}
+                  />
                 ) : (
                   <VarContainer vars={meta.varObj} />
                 )}
