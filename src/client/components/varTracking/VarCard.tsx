@@ -22,29 +22,48 @@ const VarCard = ({ keyName, value, type }: IvarCardProps) => {
     valueRepresentation = value;
   }
   // Array
-  else if (value.length > -1 || value.size > -1) {
+  else if (Array.isArray(value) || value.has) {
     const elArr = [];
     let first = true;
     elArr.push(<span key={keyName + '1'.toString()}>{'['}</span>);
     for (const el of value) {
+      let content;
       if (!first) {
-        elArr.push(
-          <span
-            key={keyName + el.toString()}
-            className='array-card-element'
-          >{`, ${JSON.stringify(el)}`}</span>
-        );
+        content = `, ${JSON.stringify(el)}`;
       } else {
+        content = `${JSON.stringify(el)}`;
         first = false;
-        elArr.push(
-          <span
-            key={keyName + el.toString()}
-            className='array-card-element'
-          >{`${JSON.stringify(el)}`}</span>
-        );
       }
+      elArr.push(
+        <span key={keyName + el.toString()} className='array-card-element'>
+          {content}
+        </span>
+      );
     }
     elArr.push(<span key={keyName + '2'.toString()}>{']'}</span>);
+    valueRepresentation = elArr;
+  }
+  // Object
+  else {
+    const elArr = [];
+    let first = true;
+    elArr.push(<span key={keyName + '1'.toString()}>{'{'}</span>);
+    elArr.push(<div></div>);
+    for (const el in value) {
+      if (!first) {
+        elArr.push(<span>{`, `}</span>);
+        elArr.push(<div></div>);
+      } else {
+        first = false;
+      }
+      elArr.push(
+        <span key={keyName + el.toString()} className='array-card-element'>
+          {`${JSON.stringify(el)} : ${JSON.stringify(value[el])}`}
+        </span>
+      );
+    }
+    elArr.push(<div></div>);
+    elArr.push(<span key={keyName + '2'.toString()}>{'}'}</span>);
     valueRepresentation = elArr;
   }
 

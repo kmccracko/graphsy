@@ -22,7 +22,7 @@ const ControlButtons = ({
         className={algoRunning ? 'inactive' : ''}
         onClick={handleStart}
       >
-        Run
+        ▶
       </button>
     </div>
   ) : (
@@ -32,14 +32,14 @@ const ControlButtons = ({
         className={algoRunning ? '' : 'inactive'}
         onClick={handleAbort}
       >
-        Edit
+        ⚙
       </button>
       <button
         id='pause-btn'
         className={algoRunning ? '' : 'inactive'}
         onClick={handlePause}
       >
-        {pausedState ? 'Unpause' : 'Pause'}
+        {pausedState ? '▶' : '❚❚'}
       </button>
     </div>
   );

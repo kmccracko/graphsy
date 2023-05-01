@@ -5,5 +5,6 @@ export const metaStarter = (): any => {
     visited: new Set(),
     discovered: new Set(),
     varObj: {},
+    logArr: [],
   };
 };

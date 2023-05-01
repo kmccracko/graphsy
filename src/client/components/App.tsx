@@ -11,6 +11,7 @@ import chooseGrid from '../util/chooseGrid';
 import VarContainer from './varTracking/VarContainer';
 import ControlButtons from './ControlButtons';
 import PanelOptions from './PanelOptions';
+import LogContainer from './varTracking/LogContainer';
 
 // key for use in resetting meta sets. ensures no accidental resets
 const resetKey = Symbol('RESET');
@@ -183,6 +184,28 @@ const App = () => {
     await sleep(ms);
   };
 
+  const updateLogs = async (...args) => {
+    if (checkForAbort()) return true;
+    await checkForPause();
+
+    const [label, content] = args;
+
+    // updates var object to inform var container
+    setMeta((meta: any) => {
+      const tempMeta = { ...meta };
+      const tempLogArr = [...tempMeta.logArr];
+
+      const newLog = [];
+      newLog.push(label);
+      if (args.length > 1) newLog.push(content);
+      tempLogArr.push(newLog);
+
+      tempMeta.logArr = tempLogArr;
+      return tempMeta;
+    });
+    await sleep(delay);
+  };
+
   /**
    * Invoke currentAlgo function and provide it with params from current state
    */
@@ -195,11 +218,11 @@ const App = () => {
     if (!func) return setAlgoRunning(false);
     func(
       currentGrid,
-      startPoint,
-      endPoint,
+      startPoint.map((n) => Number(n)),
+      endPoint.map((n) => Number(n)),
       updateScreen,
       updateVars,
-      setAlgoRunning,
+      updateLogs,
       resetKey
     );
   };
@@ -217,11 +240,10 @@ const App = () => {
     let newFunc;
     try {
       newFunc = new Function(
-        'grid, start=[0,0], end, updateScreen, updateVars, shutOff, resetKey',
+        'grid, start=[0,0], end, updateScreen, updateVars, log, resetKey',
         `
-        return async (grid, start, end, updateScreen, updateVars, shutOff, resetKey) => { 
-          ${algoString} \n 
-          shutOff(false)
+        return async (grid, start, end, updateScreen, updateVars, log, resetKey) => { 
+          ${algoString}
         }`
       );
     } catch (err) {
@@ -237,7 +259,10 @@ const App = () => {
 
   // control button functions
   const handleStart = () => setAlgoRunning(true);
-  const handleAbort = () => (stopStatus.current.isAborted ^= 1);
+  const handleAbort = () => {
+    stopStatus.current.isAborted ^= 1;
+    setAlgoRunning(false);
+  };
   const handlePause = () => (stopStatus.current.isPaused ^= 1);
 
   // options functions
@@ -361,7 +386,10 @@ const App = () => {
                     handleDefaultFillChange={handleDefaultFillChange}
                   />
                 ) : (
-                  <VarContainer vars={meta.varObj} />
+                  <div id='panel-alt'>
+                    <VarContainer vars={meta.varObj} />
+                    <LogContainer logs={meta.logArr} />
+                  </div>
                 )}
                 <a
                   className='social-link'
