@@ -35,9 +35,13 @@ for (let r = 0; r < grid.length; r++) {
 
     // update screen visuals, update grid value
     await updateScreen({discovered:\`\${r}.\${c}\`})
+
+    // log something to panel
+    if (counter % 5 === 0) await log(\`\${counter} divisible by 5 :)\`)
+    if (counter % 14 === 0) await log('Div by 14', \`\${counter} divisible by 14 :)\`)
   }
 }`,
-  desc: 'Uses nested for loops to iterate through array. Ignores walls ("W"). Tracks variables of interest.',
+  desc: 'Uses nested for loops to iterate through array. Ignores walls ("W"). Tracks variables of interest and writes logs.',
 };
 
 const countIslands = {
