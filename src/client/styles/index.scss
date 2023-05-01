@@ -150,57 +150,103 @@ button {
       margin-bottom: 15px;
     }
   }
-  #var-container {
-    margin-top: 10px;
-    // border: 5px solid black;
-    // max-width: 50vw;
-    // background-color: #8b8b8d;
-    min-width: 18vw;
-    overflow-y: auto;
+  #panel-alt {
+    height: 100%;
     display: flex;
-    justify-content: space-evenly;
-    // flex-direction: column;
-    flex-wrap: wrap;
-    padding: 10px 0px;
-
-    .var-card {
-      width: 100%;
-      margin: 0px 10px 0px 0px;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-y: auto;
+    #var-container {
+      margin-top: 10px;
+      // border: 5px solid black;
+      // max-width: 50vw;
+      // background-color: #8b8b8d;
+      min-width: 18vw;
+      overflow-y: auto;
       display: flex;
-      flex-direction: column;
-      // align-items: flex-start;
-      .var-card-title {
-        font-size: larger;
-        // font-weight: bold;
-        // background-color: rgb(0, 0, 0);
-        color: rgb(255, 255, 255);
-        padding: 20px 5px 5px 5px;
-        align-self: stretch;
-      }
-      .var-card-value {
-        // display: flex;
-        // flex-wrap: wrap;
-        font-size: large;
-        background-color: rgb(255, 255, 255, 0.8);
-        color: rgb(0, 0, 0);
-        padding: 7px 15px;
-        font-family: monospace;
-        // width: 95%;
-        // align-self: center;
-        .var-number {
-          font-weight: bold;
-          font-size: x-large;
-        }
-      }
-      &:has(.var-card-value .var-number) {
-        width: unset;
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+      max-height: 80%;
+      padding: 10px 0px;
+
+      .var-card {
+        width: 100%;
+        margin: 0px 10px 0px 0px;
+        display: flex;
+        flex-direction: column;
+        // align-items: flex-start;
         .var-card-title {
-          text-align: center;
+          font-size: larger;
+          // font-weight: bold;
+          // background-color: rgb(0, 0, 0);
+          color: rgb(255, 255, 255);
+          padding: 20px 5px 5px 5px;
+          align-self: stretch;
         }
         .var-card-value {
-          margin: 0px 5px;
-          text-align: center;
+          // display: flex;
+          // flex-wrap: wrap;
+          font-size: large;
+          background-color: rgb(255, 255, 255, 0.8);
+          color: rgb(0, 0, 0);
+          padding: 7px 15px;
+          font-family: monospace;
+          // width: 95%;
+          // align-self: center;
+          .var-number {
+            font-weight: bold;
+            font-size: x-large;
+          }
         }
+        &:has(.var-card-value .var-number) {
+          width: unset;
+          .var-card-title {
+            text-align: center;
+          }
+          .var-card-value {
+            margin: 0px 5px;
+            text-align: center;
+          }
+        }
+      }
+    }
+    #log-container {
+      max-height: 40%;
+      overflow-y: scroll;
+      background-color: rgb(33, 33, 33);
+      rotate: 180deg;
+      direction: rtl;
+
+      &::-webkit-scrollbar {
+        width: 15px;
+      }
+      &::-webkit-scrollbar-track {
+        // margin: 15px;
+        background-color: rgb(137, 137, 137);
+        // border-radius: 10px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgb(205, 205, 205);
+        // border: 2px solid rgb(126, 109, 0);
+        // border-radius: 10px;
+        &:hover {
+          background: #88a8af;
+        }
+      }
+
+      div {
+        rotate: 180deg;
+        direction: ltr;
+        padding: 10px;
+        border-bottom: 1px solid #575757;
+      }
+      label {
+        letter-spacing: unset;
+        font-size: unset;
+        color: rgb(157, 208, 255);
+      }
+      & p {
+        margin: 4px 0px;
       }
     }
   }
