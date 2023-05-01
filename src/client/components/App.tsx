@@ -1,155 +1,324 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Row from './Row';
 
 import '../styles/index.scss';
-import Button from './Button';
+import { metaStarter } from '../util/metaStarter';
+import { sleep } from '../util/sleep';
+import { prettyLog } from '../util/prettyLog';
+import { algoChoices } from '../util/algoChoices';
+import chooseGrid from '../util/chooseGrid';
+import VarContainer from './varTracking/VarContainer';
+import ControlButtons from './ControlButtons';
+import PanelOptions from './PanelOptions';
 
-// const metaStarter = () => {
-//   return {
-//     current: ``,
-//     potential: ``,
-//     visited: new Set(),
-//     discovered: new Set(),
-//   };
-// };
+// key for use in resetting meta sets. ensures no accidental resets
+const resetKey = Symbol('RESET');
 
 const App = () => {
   // set vars
-  const [fullGrid, setFullGrid] = useState<any>([[]]);
+  const [customAlgoString, setCustomAlgoString] = useState<string>('');
+  const [customGridString, setCustomGridString] = useState<string>(
+    '[[1,2,3],[4,5,6],[7,8,9]]'
+  );
+  const [defaultFill, setDefaultFill] = useState<string>('');
+
+  const [algoChoice, setAlgoChoice] = useState<string>('nestedForLoop');
+  const [algoDesc, setAlgoDesc] = useState<string>('');
+  const [gridChoice, setGridChoice] = useState<string>('maze');
+  const [currentGrid, setCurrentGrid] = useState<any[][]>([[]]);
   const [algoRunning, setAlgoRunning] = useState<boolean>(false);
-  const [meta, setMeta] = useState<any>({
-    current: { current: '' },
-    potential: { potential: '' },
-    visited: new Set(),
-    discovered: new Set(),
-  });
+  const [startPoint, setStartPoint] = useState<number[]>([0, 0]);
+  const [endPoint, setEndPoint] = useState<number[]>([0, 0]);
+  const [delay, setDelay] = useState<number>(10);
+  const [meta, setMeta] = useState<any>(metaStarter());
+  const [pausedState, setPausedState] = useState<boolean>(false);
+
+  let stopStatus = useRef({ isPaused: 1, isAborted: 1 });
 
   useEffect(() => {
-    // setFullGrid([
-    //   [1, 2, 3],
-    //   [4, 5, 6],
-    //   [7, 8, 9],
-    // ]);
-    setFullGrid(
-      [
-        [0, 0, 1, 0, 0],
-        [0, 0, 1, 0, 0],
-        [1, 0, 1, 0, 1],
-        [1, 1, 1, 1, 1],
-      ]
-      // [
-      //   [1, 1, 0, 0, 1],
-      //   [1, 1, 0, 0, 0],
-      //   [0, 0, 1, 0, 0],
-      //   [1, 0, 0, 1, 1],
-      // ]
-    );
-  }, []);
+    if (gridChoice !== 'custom') setCurrentGrid(chooseGrid(gridChoice));
+  }, [gridChoice]);
+
+  useEffect(() => {
+    let { func, desc } = algoChoices[algoChoice];
+    setCustomAlgoString(func);
+    setAlgoDesc(desc);
+  }, [algoChoice]);
+
+  useEffect(() => {
+    setEndPoint([currentGrid.length - 1, currentGrid[0].length - 1]);
+    if (!algoRunning) setMeta(() => metaStarter());
+  }, [currentGrid]);
+
   useEffect(() => {
     console.log('algoRunning changed! is now', algoRunning);
-    if (algoRunning) runAlgo();
+    if (algoRunning && algoChoice) {
+      stopStatus.current.isAborted = 0;
+      stopStatus.current.isPaused = 0;
+      runAlgo();
+    } else {
+      stopStatus.current.isAborted = 1;
+      stopStatus.current.isPaused = 1;
+      setAlgoRunning(false);
+    }
   }, [algoRunning]);
 
-  const updateGrid = (e: any, row: number, col: number) => {
-    const newValue = e.target.value;
-    const gridClone = [...fullGrid];
-    gridClone[row][col] = newValue;
-    setFullGrid(gridClone);
+  /**
+   * Updates the grid's value at a given coordinate
+   *
+   * @param e event object, e.target.value is new value
+   * @param row row of grid (number)
+   * @param col column of grid (number)
+   */
+  const updateGrid = async (e: any, row: number, col: number) => {
+    const newValue =
+      Number(e.target.value) !== Number(e.target.value) ||
+      e.target.value !== '0'
+        ? e.target.value
+        : Number(e.target.value);
+    setCurrentGrid((grid: any) => {
+      const gridClone = [...grid];
+      console.log(gridClone);
+      gridClone[row][col] = newValue;
+      return [...gridClone];
+    });
   };
 
-  const rows = fullGrid.map((el: any, i: number) => {
-    return (
-      <Row key={i} row={i} cells={el} meta={meta} updateGrid={updateGrid}></Row>
-    );
-  });
-
-  const sleep = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  const checkForAbort = () => {
+    if (stopStatus.current.isAborted) {
+      setAlgoRunning(false);
+      return true;
+    }
   };
 
-  const runAlgo1 = async () => {
-    // app should also pass a func to update its state
-    // we run the func after each loop of this algo, the func updates app state, and everything below it rerenders
-
-    for (let i = 0; i < fullGrid.length; i++) {
-      const row = fullGrid[i];
-      for (let j = 0; j < row.length; j++) {
-        const col = row[j];
-        console.log(i, j);
-
-        setMeta({
-          ...meta,
-          current: `${i}.${j}`,
-          visited: meta.visited.add(`${i}.${j}`),
-        });
-        await sleep(500);
+  const checkForPause = async () => {
+    while (stopStatus.current.isPaused) {
+      if (stopStatus.current.isPaused) {
+        setPausedState(true);
+        if (checkForAbort()) return true;
+        console.log('paused...');
+        await sleep(200);
       }
     }
-
-    setAlgoRunning(false);
+    setPausedState(false);
   };
 
+  /**
+   *
+   * @param newMeta object with new values for meta state. Sets will use the .add method.
+   * @param ms Milliseconds to delay after updating screen.
+   */
+  const updateScreen = async (newMeta: any, ms: number = delay) => {
+    // check if we should abort, if yes returns 1
+    // if "await updateScreen({...})" ever returns 1,
+    // the executing function should try to complete itself however it can
+    if (checkForAbort()) return true;
+    await checkForPause();
+
+    // updates meta object to inform classes
+    setMeta((meta: any) => {
+      const tempObj = { ...meta };
+
+      // update visited if key exists. if resetKey passed, reset visited
+      // if resetKey, shape should be key: [resetKey, newSetValue] where newSetValue must be a set
+      if (newMeta.visited !== undefined) {
+        if (newMeta.visited.length && newMeta.visited[0] === resetKey)
+          tempObj.visited = newMeta.visited[1];
+        else tempObj.visited = meta.visited.add(newMeta.visited);
+      }
+
+      // update discovered if key exists. if resetKey passed, reset discovered
+      // if resetKey, shape should be key: [resetKey, newSetValue] where newSetValue must be a set
+      if (newMeta.discovered !== undefined) {
+        if (newMeta.discovered.length && newMeta.discovered[0] === resetKey)
+          tempObj.discovered = newMeta.discovered[1];
+        else tempObj.discovered = meta.discovered.add(newMeta.discovered);
+      }
+
+      // update potential if key exists
+      if (newMeta.potential !== undefined)
+        tempObj.potential = newMeta.potential;
+
+      // update current if key exists
+      if (newMeta.current !== undefined) tempObj.current = newMeta.current;
+      return tempObj;
+    });
+
+    // updates grid values if passed
+    if (newMeta.grid !== undefined) {
+      console.log(newMeta.grid);
+      await updateGrid(
+        { target: { value: newMeta.grid[2] } },
+        newMeta.grid[0],
+        newMeta.grid[1]
+      );
+    }
+    await sleep(ms);
+  };
+
+  /**
+   *
+   * @param newVarObj Object with key of var name and var value
+   * @param ms Delay time. Global delay unless specified
+   * @returns
+   */
+  const updateVars = async (newVarObj, ms: number = delay) => {
+    if (checkForAbort()) return true;
+    await checkForPause();
+
+    // updates var object to inform var container
+    setMeta((meta: any) => {
+      const [varKey, newValue] = Object.entries(newVarObj)[0];
+      const tempMeta = { ...meta };
+      const tempVarObj = { ...tempMeta.varObj };
+
+      tempVarObj[varKey] = newValue;
+
+      // if a key exists, it will be updated
+      // else it will be created
+      tempMeta.varObj = tempVarObj;
+      return tempMeta;
+    });
+    await sleep(ms);
+  };
+
+  /**
+   * Invoke currentAlgo function and provide it with params from current state
+   */
   const runAlgo = async () => {
-    // await resetMeta();
-    const discovered = new Set();
-    let islandCount = 0;
+    const func = buildAlgo(customAlgoString);
 
-    const findMore = async (i: number, j: number) => {
-      console.log(meta);
-      console.log({
-        ...meta,
-        potential: { ...meta.potential, potential: `${i}.${j}` },
-      });
-      setMeta({
-        ...meta,
-        potential: { ...meta.potential, potential: `${i}.${j}` },
-      });
-      await sleep(500);
-      // if 1 and not yet seen and coordinate is valid, discover it and continue
-      if (!discovered.has(`${i}.${j}`) && fullGrid[i] && fullGrid[i][j] === 1) {
-        setMeta({
-          ...meta,
-          current: { ...meta.current, current: `${i}.${j}` },
-          discovered: meta.discovered.add(`${i}.${j}`),
-        });
-        await sleep(500);
-        // add location to saved
-        discovered.add(`${i}.${j}`);
-        // try up, down, left, right
-        await findMore(i - 1, j);
-        await findMore(i + 1, j);
-        await findMore(i, j - 1);
-        await findMore(i, j + 1);
-        setMeta({
-          ...meta,
-          potential: { ...meta.potential, potential: `` },
-        });
-        await sleep(500);
-      }
-    };
+    setMeta(() => metaStarter());
+    await sleep(100);
 
-    for (let i = 0; i < fullGrid.length; i++) {
-      for (let j = 0; j < fullGrid[i].length; j++) {
-        // if 1s, check if we've seen it
-        setMeta({
-          ...meta,
-          current: { ...meta.current, current: `${i}.${j}` },
-          visited: meta.visited.add(`${i}.${j}`),
-        });
-        await sleep(500);
-        if (fullGrid[i][j] === 1) {
-          // if undiscovered, launch findMore recursion
-          if (!discovered.has(`${i}.${j}`)) {
-            islandCount++;
-            await findMore(i, j);
-          }
-        }
+    if (!func) return setAlgoRunning(false);
+    func(
+      currentGrid,
+      startPoint,
+      endPoint,
+      updateScreen,
+      updateVars,
+      setAlgoRunning,
+      resetKey
+    );
+  };
+
+  /**
+   *
+   * Updates currentAlgo with a func generated from user input.
+   *
+   * Takes user's input and wraps it in a function that returns an async function.
+   *
+   * We generate the outer function, then invoke it and pass the returned async function as the new currentAlgo.
+   */
+  const buildAlgo = (algoString: string) => {
+    console.log(algoString);
+    let newFunc;
+    try {
+      newFunc = new Function(
+        'grid, start=[0,0], end, updateScreen, updateVars, shutOff, resetKey',
+        `
+        return async (grid, start, end, updateScreen, updateVars, shutOff, resetKey) => { 
+          ${algoString} \n 
+          shutOff(false)
+        }`
+      );
+    } catch (err) {
+      console.log(err);
+      alert(
+        'Could not generate algorithm. Aborting. Check console for details'
+      );
+      return newFunc;
+    }
+    const asyncFunc = newFunc();
+    return asyncFunc;
+  };
+
+  // control button functions
+  const handleStart = () => setAlgoRunning(true);
+  const handleAbort = () => (stopStatus.current.isAborted ^= 1);
+  const handlePause = () => (stopStatus.current.isPaused ^= 1);
+
+  // options functions
+  const handleDelayChange = (e) => setDelay(Number(e.target.value));
+  const handlePointChange = (pos, value, type) => {
+    let [point, setter] = [startPoint, setStartPoint];
+    if (type === 'e') [point, setter] = [endPoint, setEndPoint];
+    const newArr = [...point];
+    newArr[pos] = value;
+    setter(newArr);
+  };
+  const handleAlgoSelect = (e: any) => {
+    setAlgoChoice(e.target.value);
+    handleCustomFuncChange(algoChoices[e.target.value].func);
+  };
+  const handleGridSelect = (e: any) => {
+    setGridChoice(e.target.value);
+  };
+  const handleDefaultFillChange = (e: any) => {
+    setDefaultFill(e.target.value);
+  };
+  const handleCustomFuncChange = (newValue: string) => {
+    setCustomAlgoString(newValue);
+  };
+  const handleCustomGridChange = (newValue: string) => {
+    const cleanStr = newValue.replaceAll("'", '"');
+    console.log(cleanStr);
+    setCustomGridString(cleanStr);
+  };
+  const handleCreateGrid = () => {
+    if (gridChoice !== 'custom') return;
+
+    let parsedGrid;
+
+    // try to parse json, then try to eval
+    try {
+      parsedGrid = JSON.parse(customGridString);
+    } catch (err) {
+      // if not json, try to use eval
+      try {
+        parsedGrid = eval(customGridString);
+      } catch (err) {
+        // if eval fails, give give both errors?
+        console.log(err);
+        return alert('Could not generate grid. Check console for details.');
       }
     }
-    alert(islandCount);
+    // verify this is an array
+    if (!Array.isArray(parsedGrid)) {
+      alert('Input is not an array. Aborting.');
+      return;
+    }
+    // verify row lengths all match
+    let firstLen = parsedGrid[0].length;
+    for (let row of parsedGrid) {
+      if (row.length !== firstLen)
+        alert('Warning: This grid has rows of inequal length.');
+    }
+    setCurrentGrid(parsedGrid);
+  };
+  const handleGridResize = (adjustments: [number, number]) => {
+    let [rowChange, colChange] = adjustments;
 
-    setAlgoRunning(false);
+    let newGrid;
+    if (rowChange) {
+      if (rowChange > 0) {
+        newGrid = [
+          ...currentGrid,
+          Array(currentGrid[0].length).fill(defaultFill),
+        ];
+      } else if (currentGrid.length > 1) {
+        newGrid = currentGrid.slice(0, -1);
+      } else return;
+    } else {
+      if (colChange < 0 && currentGrid[0].length < 2) return;
+      newGrid = currentGrid.reduce((acc, cur) => {
+        if (colChange > 0) return [...acc, [...cur, defaultFill]];
+        else return [...acc, cur.slice(0, -1)];
+      }, []);
+    }
+    setCurrentGrid(newGrid);
   };
 
   return (
@@ -158,9 +327,77 @@ const App = () => {
         <Route
           path='/'
           element={
-            <div className='grid'>
-              {rows}
-              <Button fullGrid={fullGrid} runAlgo={setAlgoRunning} />
+            <div id='main2'>
+              <div id='panel'>
+                <h1>Graphsy</h1>
+                <ControlButtons
+                  algoRunning={algoRunning}
+                  pausedState={pausedState}
+                  handleStart={handleStart}
+                  handleAbort={handleAbort}
+                  handlePause={handlePause}
+                />
+                {!algoRunning ? (
+                  <PanelOptions
+                    delay={delay}
+                    startPoint={startPoint}
+                    endPoint={endPoint}
+                    gridChoice={gridChoice}
+                    algoChoice={algoChoice}
+                    algoChoices={algoChoices}
+                    algoDesc={algoDesc}
+                    customAlgoString={customAlgoString}
+                    customGridString={customGridString}
+                    currentGrid={currentGrid}
+                    defaultFill={defaultFill}
+                    handleDelayChange={handleDelayChange}
+                    handlePointChange={handlePointChange}
+                    handleGridSelect={handleGridSelect}
+                    handleAlgoSelect={handleAlgoSelect}
+                    handleCustomFuncChange={handleCustomFuncChange}
+                    handleCustomGridChange={handleCustomGridChange}
+                    handleCreateGrid={handleCreateGrid}
+                    handleGridResize={handleGridResize}
+                    handleDefaultFillChange={handleDefaultFillChange}
+                  />
+                ) : (
+                  <VarContainer vars={meta.varObj} />
+                )}
+                <a
+                  className='social-link'
+                  href='https://github.com/kmccracko/graph-traverse'
+                  target={'blank'}
+                >
+                  Check out this project on Github
+                </a>
+              </div>
+              <div
+                id='grid'
+                style={{
+                  gridTemplateRows: `repeat(${currentGrid.length},${
+                    currentGrid.length > currentGrid[0].length
+                      ? Math.round(100 / currentGrid.length)
+                      : Math.round(100 / currentGrid[0].length)
+                  }%)`,
+                }}
+              >
+                {currentGrid.map((el: any, i: number) => {
+                  return (
+                    <Row
+                      size={
+                        currentGrid.length > currentGrid[0].length
+                          ? Math.round(100 / currentGrid.length)
+                          : Math.round(100 / currentGrid[0].length)
+                      }
+                      key={i}
+                      row={i}
+                      cells={el}
+                      meta={meta}
+                      updateGrid={updateGrid}
+                    ></Row>
+                  );
+                })}
+              </div>
             </div>
           }
         />

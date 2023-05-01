@@ -1,26 +1,25 @@
 {
-  "name": "inat-project",
+  "name": "graph-traverse",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/server/server.ts",
+  "main": "./src/client/index.tsx",
   "scripts": {
     "tsnode": "node --loader ts-node/esm --no-warnings",
     "build": "NODE_ENV=production webpack",
-    "start": "NODE_ENV=production ts-node ./src/server/server.ts",
-    "start-web": "NODE_ENV=production PORT=80 ts-node ./src/server/server.ts",
-    "dev": "NODE_ENV=development webpack-dev-server & nodemon ./src/server/server.ts",
+    "start": "NODE_ENV=production ts-node ./src/client/index.tsx",
+    "dev": "NODE_ENV=development webpack-dev-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kmccracko/inat-project.git"
+    "url": "git+https://github.com/kmccracko/graphsy"
   },
   "author": "Kyle McCracken",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kmccracko/inat-project/issues"
+    "url": "https://github.com/kmccracko/graphsy/issues"
   },
-  "homepage": "https://github.com/kmccracko/inat-project#readme",
+  "homepage": "https://github.com/kmccracko/graphsy#readme",
   "devDependencies": {
     "@babel/core": "^7.16.7",
     "@babel/preset-env": "^7.16.7",
@@ -49,6 +48,7 @@
     "webpack-dev-server": "^4.7.2"
   },
   "dependencies": {
+    "ace-builds": "^1.13.1",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv-webpack": "^8.0.1",
@@ -56,6 +56,7 @@
     "node-cache": "^5.1.2",
     "pg": "^8.8.0",
     "react": "^18.3.0-next-f0efa1164-20220901",
+    "react-ace": "^10.1.0",
     "react-client": "^1.0.1",
     "react-dom": "^18.3.0-next-f0efa1164-20220901",
     "react-router": "^6.3.0",
