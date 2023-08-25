@@ -7,9 +7,9 @@ RUN npm run build
 # delete everything except dist folder
 # RUN rm -rf !("dist")
 # move dist, delete everything, then copy it back in
-RUN mv dist ../dist
-RUN rm -rf ./*
-RUN mv ../dist dist
+# RUN mv dist ../dist
+# RUN rm -rf ./*
+# RUN mv ../dist dist
 
 ### Nginx ###
 FROM nginx:alpine
