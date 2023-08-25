@@ -2,7 +2,7 @@ import React from 'react';
 import ace from 'ace-builds/src-noconflict/ace';
 import AceEditor from 'react-ace';
 
-import 'ace-builds/webpack-resolver';
+// import 'ace-builds/webpack-resolver';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import 'ace-builds/src-noconflict/ext-language_tools';
