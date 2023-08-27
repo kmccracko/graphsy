@@ -17,6 +17,9 @@ jobs:
     environment: production
 
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -29,4 +32,4 @@ jobs:
           python3 -m pip install --user awsebcli
 
       - name: Run Deploy Script
-        run: sh ${{ github.workspace }}/scripts/deploy.sh
+        run: sh ./scripts/deploy.sh
