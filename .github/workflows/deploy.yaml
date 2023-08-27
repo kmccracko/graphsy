@@ -29,4 +29,4 @@ jobs:
           python3 -m pip install --user awsebcli
 
       - name: Run Deploy Script
-        run: sh ./scripts/deploy.sh
+        run: sh ${{ github.workspace }}/scripts/deploy.sh
