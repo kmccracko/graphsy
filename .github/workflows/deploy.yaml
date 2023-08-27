@@ -19,11 +19,14 @@ jobs:
     steps:
       - name: Setup Python
         uses: actions/setup-python@v4
-        with: '3.x'
+        with:
+          version: '3.x'
+
       - name: Run Py Script
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install --user awscli
           python3 -m pip install --user awsebcli
+
       - name: Run Deploy Script
-      - run: sh ./scripts/deploy.sh
+        run: sh ./scripts/deploy.sh
