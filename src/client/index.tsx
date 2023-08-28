@@ -5,6 +5,8 @@ import App from './components/App';
 
 const root = createRoot(document.getElementById('root')!);
 
+console.log('CICD Worked!');
+
 root.render(
   // <React.StrictMode>
   <HashRouter>

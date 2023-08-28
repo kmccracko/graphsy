@@ -6,9 +6,7 @@
   "scripts": {
     "tsnode": "node --loader ts-node/esm --no-warnings",
     "build": "NODE_ENV=production webpack",
-    "start": "NODE_ENV=production ts-node ./src/client/index.tsx",
-    "dev": "NODE_ENV=development webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "NODE_ENV=development webpack-dev-server"
   },
   "repository": {
     "type": "git",
